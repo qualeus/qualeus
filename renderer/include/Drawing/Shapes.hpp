@@ -30,42 +30,42 @@ class Shapes {
     static uint32_t polygons;
 
     template <typename T>
-    static void Draw(const Mesh<T>& mesh, const bgfx::ProgramHandle& program);
+    static void draw(const Mesh<T>& mesh, const bgfx::ProgramHandle& program);
 
-    static void DrawTriangle(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, uint32_t color);
-    static void DrawTriangle(Mesh<VertexTex>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3,  //
-                             const glm::vec2& tex1, const glm::vec2& tex2, const glm::vec2& tex3, uint32_t color);     //
+    static void draw_triangle(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, uint32_t color);
+    static void
+    draw_triangle(Mesh<VertexTex>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec2& tex1, const glm::vec2& tex2, const glm::vec2& tex3, uint32_t color);
 
-    static void DrawPlane(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec3& pt4, uint32_t color);
-    static void DrawPlane(Mesh<VertexTex>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec3& pt4, uint32_t color);
-
-    template <typename T>
-    static void DrawQuad(Mesh<T>& mesh, const glm::vec3& center, const float& radius, uint32_t color);
+    static void draw_plane(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec3& pt4, uint32_t color);
+    static void draw_plane(Mesh<VertexTex>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec3& pt4, uint32_t color);
 
     template <typename T>
-    static void DrawLine(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, uint32_t color);
+    static void draw_quad(Mesh<T>& mesh, const glm::vec3& center, const float& radius, uint32_t color);
 
     template <typename T>
-    static void DrawSpring(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, const float& width, const int& number_waves, uint32_t color);
-
-    static void DrawArrow(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, const float& sz_head, uint32_t color);
+    static void draw_line(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, uint32_t color);
 
     template <typename T>
-    static void DrawRectangle(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, uint32_t color);
+    static void draw_spring(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, const float& width, const int& number_waves, uint32_t color);
+
+    static void draw_arrow(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, const float& sz_head, uint32_t color);
 
     template <typename T>
-    static void DrawRectangleOutlined(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, uint32_t color);
-
-    static void DrawPolygon(Mesh<VertexCol>& mesh, const std::vector<glm::vec3>& points, uint32_t color);
+    static void draw_rectangle(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, uint32_t color);
 
     template <typename T>
-    static void DrawPolygonOutlined(Mesh<T>& mesh, const std::vector<glm::vec3>& points, const float& thickness, uint32_t color);
+    static void draw_rectangle_outlined(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, uint32_t color);
 
-    static void DrawCircleFan(Mesh<VertexCol>& mesh, const glm::vec3& pt1, float radius, uint32_t color);
+    static void draw_polygon(Mesh<VertexCol>& mesh, const std::vector<glm::vec3>& points, uint32_t color);
 
-    static void DrawCircleFanOutlined(Mesh<VertexCol>& mesh, const glm::vec3& pt1, float radius, const float& thickness, uint32_t color);
+    template <typename T>
+    static void draw_polygon_outlined(Mesh<T>& mesh, const std::vector<glm::vec3>& points, const float& thickness, uint32_t color);
 
-    static void Reset();
+    static void draw_circle_fan(Mesh<VertexCol>& mesh, const glm::vec3& pt1, float radius, uint32_t color);
+
+    static void draw_circle_fan_outlined(Mesh<VertexCol>& mesh, const glm::vec3& pt1, float radius, const float& thickness, uint32_t color);
+
+    static void reset();
 };
 
 }  // namespace drw

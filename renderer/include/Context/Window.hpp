@@ -21,33 +21,33 @@ namespace ctx {
 
 class Window {
    private:
-    GLFWwindow *window;
-    ovl::Overlay overlay;
+    GLFWwindow *m_window;
+    ovl::Overlay m_overlay;
 
-    std::string title;
-    int width;
-    int height;
+    std::string m_title;
+    int m_width;
+    int m_height;
 
-    float last_time = 0;
-    float current_time = 0;
-    float delta_time = 0;
+    float m_last_time = 0;
+    float m_current_time = 0;
+    float m_delta_time = 0;
 
    public:
     Window(int width = 1024, int height = 768, std::string title = "Window");
 
-    void InitializeGLFW();
-    void InitializeBGFX();
-    void InitializeIMGUI();
+    void initialize_glfw();
+    void initialize_bgfx();
+    void initialize_imgui();
 
-    void Render();
-    void Reset();
-    void Clear();
+    void render();
+    void reset();
+    void clear();
 
-    void PreDraw();
-    void Draw();
-    void Close();
-    void Cleanup();
-    bool isOpen();
+    void pre_draw();
+    void draw();
+    void close();
+    void cleanup();
+    bool is_open();
 
     int get_width();
     int get_height();

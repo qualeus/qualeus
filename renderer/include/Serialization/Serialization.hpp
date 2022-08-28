@@ -4,14 +4,12 @@
 // objects
 #include <Constraints/Constraint.hpp>
 #include <Constraints/Link.hpp>
-#include <Constraints/Slider.hpp>
-#include <Constraints/Spring.hpp>
 #include <Corpses/Circle.hpp>
 #include <Corpses/Corpse.hpp>
 #include <Corpses/Polygon.hpp>
 #include <Geometry/Bounds.hpp>
-#include <Geometry/Vector.hpp>
-#include <Geometry/Vertices.hpp>
+#include <Geometry/Vector2.hpp>
+#include <Geometry/Vertices2.hpp>
 #include <Structures/System.hpp>
 
 #include "../Context/State.hpp"
@@ -34,11 +32,7 @@ CEREAL_REGISTER_POLYMORPHIC_RELATION(phy::Corpse, phy::Polygon)
 
 CEREAL_REGISTER_TYPE(phy::Constraint)
 CEREAL_REGISTER_TYPE(phy::Link)
-CEREAL_REGISTER_TYPE(phy::Slider)
-CEREAL_REGISTER_TYPE(phy::Spring)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(phy::Constraint, phy::Link)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(phy::Constraint, phy::Slider)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(phy::Constraint, phy::Spring)
 
 namespace cereal {
 
@@ -90,8 +84,8 @@ void save(Archive& archive, const phy::System& system) {
     gmt::BoundsI limits = system.get_limits();
     bool gravity = system.get_gravity();
     bool enable_limits = system.get_enable_limits();
-    gmt::UnitI LS = system.get_LS();
-    gmt::UnitI G = system.get_G();
+    gmt::UnitI LS = system.get_ls();
+    gmt::UnitI G = system.get_g();
     gmt::UnitI force_x = system.get_force_x();
     gmt::UnitI force_y = system.get_force_y();
     gmt::UnitI dt = system.get_dt();
@@ -157,8 +151,8 @@ void load(Archive& archive, phy::System& system) {
     system.set_limits(limits);
     system.set_gravity(gravity);
     system.set_enable_limits(enable_limits);
-    system.set_LS(LS);
-    system.set_G(G);
+    system.set_ls(LS);
+    system.set_g(G);
     system.set_force_x(force_x);
     system.set_force_y(force_y);
     system.set_dt(dt);
@@ -390,110 +384,25 @@ void load(Archive& archive, phy::Link& link) {
     link.set_min_size(min_size);
 }
 
-template <class Archive>
-void save(Archive& archive, const phy::Slider& slider) {
-    gmt::UnitI damping = slider.get_damping();
-    gmt::UnitI max_distance = slider.get_max_distance();
-    std::vector<std::shared_ptr<phy::Corpse>> slider_corpses = slider.get_slider_corpses();
-    std::vector<gmt::VectorI> slider_relative_pos = slider.get_slider_relative_pos();
-    std::vector<bool> slider_rotations = slider.get_slider_rotations();
-    std::vector<gmt::UnitI> slider_relative_angles = slider.get_slider_relative_angles();
-    std::vector<gmt::UnitI> slider_frictions = slider.get_slider_frictions();
-
-    archive(cereal::base_class<phy::Constraint>(&slider));
-    archive(cereal::make_nvp<gmt::UnitI>("damping", damping),                                               // param damping
-            cereal::make_nvp<gmt::UnitI>("max_distance", max_distance),                                     // param max_distance
-            cereal::make_nvp<std::vector<std::shared_ptr<phy::Corpse>>>("slider_corpses", slider_corpses),  // param slider_corpses
-            cereal::make_nvp<std::vector<gmt::VectorI>>("slider_relative_pos", slider_relative_pos),        // param slider_relative_pos
-            cereal::make_nvp<std::vector<bool>>("slider_rotations", slider_rotations),                      // param slider_rotations
-            cereal::make_nvp<std::vector<gmt::UnitI>>("slider_relative_angles", slider_relative_angles),    // param slider_relative_angles
-            cereal::make_nvp<std::vector<gmt::UnitI>>("slider_frictions", slider_frictions)                 // param slider_frictions
-    );
-}
-
-template <class Archive>
-void load(Archive& archive, phy::Slider& slider) {
-    gmt::UnitI damping;
-    gmt::UnitI max_distance;
-    std::vector<std::shared_ptr<phy::Corpse>> slider_corpses;
-    std::vector<gmt::VectorI> slider_relative_pos;
-    std::vector<bool> slider_rotations;
-    std::vector<gmt::UnitI> slider_relative_angles;
-    std::vector<gmt::UnitI> slider_frictions;
-
-    archive(cereal::base_class<phy::Constraint>(&slider));
-    archive(cereal::make_nvp<gmt::UnitI>("damping", damping),                                               // param damping
-            cereal::make_nvp<gmt::UnitI>("max_distance", max_distance),                                     // param max_distance
-            cereal::make_nvp<std::vector<std::shared_ptr<phy::Corpse>>>("slider_corpses", slider_corpses),  // param slider_corpses
-            cereal::make_nvp<std::vector<gmt::VectorI>>("slider_relative_pos", slider_relative_pos),        // param slider_relative_pos
-            cereal::make_nvp<std::vector<bool>>("slider_rotations", slider_rotations),                      // param slider_rotations
-            cereal::make_nvp<std::vector<gmt::UnitI>>("slider_relative_angles", slider_relative_angles),    // param slider_relative_angles
-            cereal::make_nvp<std::vector<gmt::UnitI>>("slider_frictions", slider_frictions)                 // param slider_frictions
-    );
-
-    slider.set_damping(damping);
-    slider.set_max_distance(max_distance);
-    slider.set_slider_corpses(slider_corpses);
-    slider.set_slider_relative_pos(slider_relative_pos);
-    slider.set_slider_rotations(slider_rotations);
-    slider.set_slider_relative_angles(slider_relative_angles);
-    slider.set_slider_frictions(slider_frictions);
-}
-
-template <class Archive>
-void save(Archive& archive, const phy::Spring& spring) {
-    gmt::UnitI size = spring.get_size();
-    gmt::UnitI damping = spring.get_damping();
-    gmt::UnitI max_size = spring.get_max_size();
-    gmt::UnitI min_size = spring.get_min_size();
-
-    archive(cereal::base_class<phy::Constraint>(&spring));
-    archive(cereal::make_nvp<gmt::UnitI>("size", size),          // param size
-            cereal::make_nvp<gmt::UnitI>("damping", damping),    // param damping
-            cereal::make_nvp<gmt::UnitI>("max_size", max_size),  // param max_size
-            cereal::make_nvp<gmt::UnitI>("min_size", min_size)   // param min_size
-    );
-}
-
-template <class Archive>
-void load(Archive& archive, phy::Spring& spring) {
-    gmt::UnitI size;
-    gmt::UnitI damping;
-    gmt::UnitI max_size;
-    gmt::UnitI min_size;
-
-    archive(cereal::base_class<phy::Constraint>(&spring));
-    archive(cereal::make_nvp<gmt::UnitI>("size", size),          // param size
-            cereal::make_nvp<gmt::UnitI>("damping", damping),    // param damping
-            cereal::make_nvp<gmt::UnitI>("max_size", max_size),  // param max_size
-            cereal::make_nvp<gmt::UnitI>("min_size", min_size)   // param min_size
-    );
-
-    spring.set_size(size);
-    spring.set_damping(damping);
-    spring.set_max_size(max_size);
-    spring.set_min_size(min_size);
+template <class Archive, typename T>
+void save(Archive& archive, const gmt::Vertices2<T>& vertices) {
+    archive(cereal::make_nvp<std::vector<std::shared_ptr<gmt::Vector2<T>>>>("vertices", vertices.vertices));  // param vertices
 }
 
 template <class Archive, typename T>
-void save(Archive& archive, const gmt::Vertices<T>& vertices) {
-    archive(cereal::make_nvp<std::vector<std::shared_ptr<gmt::Vector<T>>>>("vertices", vertices.vertices));  // param vertices
+void load(Archive& archive, gmt::Vertices2<T>& vertices) {
+    archive(cereal::make_nvp<std::vector<std::shared_ptr<gmt::Vector2<T>>>>("vertices", vertices.vertices));  // param vertices
 }
 
 template <class Archive, typename T>
-void load(Archive& archive, gmt::Vertices<T>& vertices) {
-    archive(cereal::make_nvp<std::vector<std::shared_ptr<gmt::Vector<T>>>>("vertices", vertices.vertices));  // param vertices
-}
-
-template <class Archive, typename T>
-void save(Archive& archive, const gmt::Vector<T>& vector) {
+void save(Archive& archive, const gmt::Vector2<T>& vector) {
     archive(cereal::make_nvp<T>("x", vector.x),  // param x
             cereal::make_nvp<T>("y", vector.y)   // param y
     );
 }
 
 template <class Archive, typename T>
-void load(Archive& archive, gmt::Vector<T>& vector) {
+void load(Archive& archive, gmt::Vector2<T>& vector) {
     archive(cereal::make_nvp<T>("x", vector.x),  // param x
             cereal::make_nvp<T>("y", vector.y)   // param y
     );

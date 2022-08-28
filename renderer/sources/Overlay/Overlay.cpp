@@ -2,9 +2,9 @@
 
 namespace ovl {
 
-Overlay::Overlay() {}
+Overlay::Overlay() { }
 
-void Overlay::Initialize(GLFWwindow *window) {
+void Overlay::initialize(GLFWwindow *window) {
     // Initialize ImGui
     auto imgui_program = create_program("imgui");
     imgui_init(window, imgui_program);
@@ -48,35 +48,45 @@ bgfx::ProgramHandle Overlay::create_program(const char *name) {
     return bgfx::createProgram(vs, fs, true);
 }
 
-void Overlay::Draw() { imgui_render(); }
+void Overlay::draw() {
+    imgui_render();
+}
 
-void Overlay::PollEvents(float dt) { imgui_events(dt); }
+void Overlay::poll_events(float dt) {
+    imgui_events(dt);
+}
 
-void Overlay::Reset(int width, int height) { imgui_reset(width, height); }
+void Overlay::reset(int width, int height) {
+    imgui_reset(width, height);
+}
 
-void Overlay::Cleanup() { imgui_shutdown(); }
+void Overlay::cleanup() {
+    imgui_shutdown();
+}
 
 void Overlay::glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     imgui_key_callback(window, key, scancode, action, mods);
 
     if (!imgui_want_keyboard()) {  // Ignore when ImGui has keyboard focus
-        ctx::Inputs::HandleKeyboardInputs(key, action);
+        ctx::Inputs::handle_keyboard_inputs(key, action);
     }
 }
 
-void Overlay::glfw_char_callback(GLFWwindow *window, unsigned int codepoint) { imgui_char_callback(window, codepoint); }
+void Overlay::glfw_char_callback(GLFWwindow *window, unsigned int codepoint) {
+    imgui_char_callback(window, codepoint);
+}
 
 void Overlay::glfw_mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
     imgui_mouse_button_callback(window, button, action, mods);
 
     if (!imgui_want_mouse()) {  // Ignore when ImGui has mouse focus
-        ctx::Inputs::HandleMouseInputs(button, action);
+        ctx::Inputs::handle_mouse_inputs(button, action);
     }
 }
 
 void Overlay::glfw_cursor_pos_callback(GLFWwindow *window, double xpos, double ypos) {
     if (!imgui_want_mouse()) {  // Ignore when ImGui has mouse focus
-        ctx::Inputs::HandleCursorPos(xpos, ypos);
+        ctx::Inputs::handle_cursor_pos(xpos, ypos);
     }
 }
 
@@ -84,7 +94,7 @@ void Overlay::glfw_scroll_callback(GLFWwindow *window, double xoffset, double yo
     imgui_scroll_callback(window, xoffset, yoffset);
 
     if (!imgui_want_mouse()) {  // Ignore when ImGui has mouse focus
-        ctx::Inputs::HandleMouseScroll(xoffset, yoffset);
+        ctx::Inputs::handle_mouse_scroll(xoffset, yoffset);
     }
 }
 

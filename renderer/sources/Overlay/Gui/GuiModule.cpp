@@ -95,9 +95,9 @@ bool TriCheckBox(const char* label, int* v_tristate) {
 }
 
 bool PushButton(const char* str_id, bool* v) {
-    if (v) {}
+    if (v) { }
     if (ImGui::Button(str_id)) { *v = !v; }
-    if (v) {}
+    if (v) { }
 
     return v;
 }

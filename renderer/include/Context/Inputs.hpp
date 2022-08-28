@@ -16,63 +16,64 @@ class Inputs {
    private:
     Inputs();
 
+    static glm::vec2 m_mouse_position;
+    static glm::vec2 m_mouse_velocity;
+    static glm::vec2 m_mouse_acceleration;
+
+    static double m_mouse_scroll;
+    static glm::vec2 m_pressed_mouse_position[MOUSE_INPUT_SIZE];
+    static glm::vec2 m_pressed_mouse_diff[MOUSE_INPUT_SIZE];
+
+    static bool m_pressed_mouse[MOUSE_INPUT_SIZE];
+    static bool m_current_mouse[MOUSE_INPUT_SIZE];
+    static bool m_released_mouse[MOUSE_INPUT_SIZE];
+
+    static bool m_pressed_keys[KEYS_INPUT_SIZE];
+    static bool m_current_keys[KEYS_INPUT_SIZE];
+    static bool m_released_keys[KEYS_INPUT_SIZE];
+
    public:
     enum KEYBOARD { QWERTY, AZERTY };
     static KEYBOARD keyboard;
 
-    static glm::vec2 mouse_position;
-    static glm::vec2 mouse_velocity;
-    static glm::vec2 mouse_acceleration;
-    static double mouse_scroll;
-    static glm::vec2 pressed_mouse_position[MOUSE_INPUT_SIZE];
-    static glm::vec2 pressed_mouse_diff[MOUSE_INPUT_SIZE];
+    static void reset_inputs();
+    static void reset_keyboard_inputs();
+    static void reset_mouse_inputs();
 
-    static bool pressed_mouse[MOUSE_INPUT_SIZE];
-    static bool current_mouse[MOUSE_INPUT_SIZE];
-    static bool released_mouse[MOUSE_INPUT_SIZE];
+    static void assign_keyboard(KEYBOARD i_keyboard);
 
-    static bool pressed_keys[KEYS_INPUT_SIZE];
-    static bool current_keys[KEYS_INPUT_SIZE];
-    static bool released_keys[KEYS_INPUT_SIZE];
+    static int convert_key(int key);
+    static int convert_key_querty(int key);
+    static int convert_key_azerty(int key);
 
-    static void ResetInputs();
-    static void ResetKeyboardInputs();
-    static void ResetMouseInputs();
+    static void handle_keyboard_inputs(int key, int action);
+    static void handle_mouse_inputs(int button, int action);
+    static void handle_cursor_pos(double xpos, double ypos);
+    static void handle_mouse_scroll(double xoffset, double yoffset);
+    static void handle_mouse_position();
 
-    static void AssignKeyboard(KEYBOARD i_keyboard);
+    static bool key_pressed(int key);
+    static bool key_down(int key);
+    static bool key_released(int key);
 
-    static int ConvertKey(int key);
-    static int ConvertKeyQuerty(int key);
-    static int ConvertKeyAzerty(int key);
+    static bool mouse_pressed(int key);
+    static bool mouse_down(int key);
+    static bool mouse_released(int key);
 
-    static void HandleKeyboardInputs(int key, int action);
-    static void HandleMouseInputs(int button, int action);
-    static void HandleCursorPos(double xpos, double ypos);
-    static void HandleMouseScroll(double xoffset, double yoffset);
-    static void HandleMousePosition();
+    static bool key_pressed(std::string key);
+    static bool key_down(std::string key);
+    static bool key_released(std::string key);
 
-    static bool KeyPressed(int key);
-    static bool KeyDown(int key);
-    static bool KeyReleased(int key);
+    static bool mouse_pressed(std::string key);
+    static bool mouse_down(std::string key);
+    static bool mouse_released(std::string key);
 
-    static bool MousePressed(int key);
-    static bool MouseDown(int key);
-    static bool MouseReleased(int key);
-
-    static bool KeyPressed(std::string key);
-    static bool KeyDown(std::string key);
-    static bool KeyReleased(std::string key);
-
-    static bool MousePressed(std::string key);
-    static bool MouseDown(std::string key);
-    static bool MouseReleased(std::string key);
-
-    static double MouseScroll();
-    static glm::vec2 MousePosition();
-    static glm::vec2 MouseVelocity();
-    static glm::vec2 MouseAcceleration();
-    static glm::vec2 PressedMousePosition(int button);
-    static glm::vec2 PressedMouseDiff(int button);
+    static double mouse_scroll();
+    static glm::vec2 mouse_position();
+    static glm::vec2 mouse_velocity();
+    static glm::vec2 mouse_acceleration();
+    static glm::vec2 pressed_mouse_position(int button);
+    static glm::vec2 pressed_mouse_diff(int button);
 
     static std::unordered_map<std::string, std::string> QWERTY_TO_AZERTY;
 };

@@ -4,8 +4,8 @@ namespace drw {
 
 template <typename T>
 Mesh<T>::Mesh() {
-    this->vertices = {};
-    this->indexes = {};
+    vertices = {};
+    indexes = {};
 }
 template Mesh<VertexCol>::Mesh();
 template Mesh<VertexTex>::Mesh();

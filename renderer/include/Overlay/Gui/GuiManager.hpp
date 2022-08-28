@@ -24,39 +24,39 @@ namespace ovl {
 
 class GuiManager {
    private:
-    ctx::State* state;
+    ctx::State* m_state;
 
-    ImGui::Console console;
+    ImGui::Console m_console;
 
-    ImGuiID dockspace_id;
-    ImGuiID dockspace_bottom_id;
-    ImGuiID dockspace_left_id;
-    ImGuiID dockspace_right_id;
-    ImGuiID dockspace_up_id;
+    ImGuiID m_dockspace_id;
+    ImGuiID m_dockspace_bottom_id;
+    ImGuiID m_dockspace_left_id;
+    ImGuiID m_dockspace_right_id;
+    ImGuiID m_dockspace_up_id;
 
-    bgfx::TextureHandle roboto_default;
-    bgfx::TextureHandle roboto_medium;
-    bgfx::TextureHandle roboto_bigger;
-    bgfx::TextureHandle consolas_smaller;
-    bgfx::TextureHandle proggy_smaller;
+    bgfx::TextureHandle m_roboto_default;
+    bgfx::TextureHandle m_roboto_medium;
+    bgfx::TextureHandle m_roboto_bigger;
+    bgfx::TextureHandle m_consolas_smaller;
+    bgfx::TextureHandle m_proggy_smaller;
 
    public:
     GuiManager(ctx::State* state);
-    bgfx::TextureHandle addFont(const std::string font_name, const void* compressed_ttf_data, int compressed_ttf_size, float size_pixels, float icon_pixels);
-    void Setup();
-    void SetupGuiBaseLayout();
-    void DrawGuiDocking();
-    void DrawGui();
-    void UpdateTheme();
+
+    bgfx::TextureHandle add_font(const std::string font_name, const void* compressed_ttf_data, int compressed_ttf_size, float size_pixels, float icon_pixels);
+    void setup();
+    void setup_gui_base_layout();
+    void draw_gui_docking();
+    void draw_gui();
+    void update_theme();
 
     /* GuiMenu */
-    void DrawGuiMenu();
-    void PopupClearSystem();
-    void ClearSystem();
+    void draw_gui_menu();
+    void popup_clear_system();
+    void clear_system();
 
-    void ShowGuiSettingsInterface();
-    void ShowGuiSettings(bool* p_open);
-    void ShowGuiSelection(bool* p_open);
+    void show_gui_settings(bool* p_open);
+    void show_gui_selection(bool* p_open);
 };
 
 }  // namespace ovl

@@ -2,48 +2,48 @@
 
 namespace ctx {
 
-Window::Window(int width, int height, std::string title) : overlay(ovl::Overlay()) {
-    this->width = width;
-    this->height = height;
-    this->title = title;
+Window::Window(int width, int height, std::string title) : m_overlay(ovl::Overlay()) {
+    m_width = width;
+    m_height = height;
+    m_title = title;
 }
 
-void Window::InitializeGLFW() {
+void Window::initialize_glfw() {
     glfwSetErrorCallback(glfw_error_callback);
 
     if (!glfwInit()) LOG_ERROR("glfwInit failed.");
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
     /* Create a windowed mode window and its OpenGL context */
-    this->window = glfwCreateWindow(this->get_width(), this->get_height(), this->title.c_str(), nullptr, nullptr);
+    m_window = glfwCreateWindow(get_width(), get_height(), m_title.c_str(), nullptr, nullptr);
 
-    if (!this->window) {
-        this->Cleanup();
+    if (!m_window) {
+        cleanup();
         LOG_ERROR("glfwCreateWindow failed.");
     }
 
     // Setting some window callbacks
-    glfwSetWindowSizeCallback(window, glfw_window_size_callback);
-    glfwSetKeyCallback(window, glfw_key_callback);
-    glfwSetCharCallback(window, glfw_char_callback);
-    glfwSetMouseButtonCallback(window, glfw_mouse_button_callback);
-    glfwSetScrollCallback(window, glfw_scroll_callback);
-    glfwSetCursorPosCallback(window, glfw_cursor_pos_callback);
+    glfwSetWindowSizeCallback(m_window, glfw_window_size_callback);
+    glfwSetKeyCallback(m_window, glfw_key_callback);
+    glfwSetCharCallback(m_window, glfw_char_callback);
+    glfwSetMouseButtonCallback(m_window, glfw_mouse_button_callback);
+    glfwSetScrollCallback(m_window, glfw_scroll_callback);
+    glfwSetCursorPosCallback(m_window, glfw_cursor_pos_callback);
 
-    glfwSetWindowUserPointer(window, this);
+    glfwSetWindowUserPointer(m_window, this);
 }
 
-void Window::InitializeBGFX() {
-    // Tell bgfx about our window
+void Window::initialize_bgfx() {
+    // Tell bgfx about our m_window
     bgfx::PlatformData platform_data = {};
 
 #if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
     platform_data.ndt = glfwGetX11Display();
-    platform_data.nwh = (void *)(uintptr_t)glfwGetX11Window(this->window);
+    platform_data.nwh = (void *)(uintptr_t)glfwGetX11Window(m_window);
 #elif BX_PLATFORM_OSX
-    platform_data.nwh = glfwGetCocoaWindow(this->window);
+    platform_data.nwh = glfwGetCocoaWindow(m_window);
 #elif BX_PLATFORM_WINDOWS
-    platform_data.nwh = glfwGetWin32Window(this->window);
+    platform_data.nwh = glfwGetWin32Window(m_window);
 #endif
     bgfx::setPlatformData(platform_data);
 
@@ -57,45 +57,45 @@ void Window::InitializeBGFX() {
     if (!bgfx::init(init)) LOG_ERROR("unable to initialize bgfx.");
 }
 
-void Window::InitializeIMGUI() {
+void Window::initialize_imgui() {
 #if ENABLE_IMGUI
-    this->overlay.Initialize(this->window);
+    m_overlay.initialize(m_window);
 #endif
 }
 
-void Window::Render() {
-    this->InitializeGLFW();
-    this->InitializeBGFX();
-    this->InitializeIMGUI();
+void Window::render() {
+    initialize_glfw();
+    initialize_bgfx();
+    initialize_imgui();
 
-    this->Reset();
+    reset();
 }
 
-void Window::Reset() {
-    bgfx::reset(this->get_width(), this->get_height());
+void Window::reset() {
+    bgfx::reset(get_width(), get_height());
 
 #if ENABLE_IMGUI
-    this->overlay.Reset(this->get_width(), this->get_height());
+    m_overlay.reset(get_width(), get_height());
 #endif
 
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, BACKGROUND_COLOR, 1.0f, 0);
     bgfx::setViewRect(0, 0, 0, bgfx::BackbufferRatio::Equal);
 }
 
-void Window::Clear() {}
+void Window::clear() { }
 
-void Window::PreDraw() {
+void Window::pre_draw() {
     // Calculate delta time
-    this->current_time = (float)glfwGetTime();  // std::static_cast<float>(glfwGetTime());
-    this->delta_time = this->current_time - this->last_time;
-    this->last_time = this->current_time;
+    m_current_time = (float)glfwGetTime();  // std::static_cast<float>(glfwGetTime());
+    m_delta_time = m_current_time - m_last_time;
+    m_last_time = m_current_time;
 
     // Poll events
-    Inputs::ResetInputs();
+    Inputs::reset_inputs();
     glfwPollEvents();
 
 #if ENABLE_IMGUI
-    this->overlay.PollEvents(this->delta_time);
+    m_overlay.poll_events(m_delta_time);
 #endif
 
     // Render
@@ -104,88 +104,96 @@ void Window::PreDraw() {
     bgfx::touch(0);
 }
 
-void Window::Draw() {
+void Window::draw() {
 #if ENABLE_IMGUI
-    this->overlay.Draw();
+    m_overlay.draw();
 #endif
 
     bgfx::frame();
 }
 
-void Window::Close() {
-    glfwDestroyWindow(this->window);
-    this->Cleanup();
+void Window::close() {
+    glfwDestroyWindow(m_window);
+    cleanup();
 }
 
-void Window::Cleanup() {
+void Window::cleanup() {
 #if ENABLE_IMGUI
-    this->overlay.Cleanup();
+    m_overlay.cleanup();
 #endif
 
     bgfx::shutdown();
     glfwTerminate();
 }
 
-bool Window::isOpen() { return !glfwWindowShouldClose(this->window); }
-int Window::get_width() { return this->width; }
-int Window::get_height() { return this->height; }
-
-void Window::glfw_error_callback(int error, const char *description) { fprintf(stderr, "GLFW error %d: %s\n", error, description); }
-
-void Window::glfw_window_size_callback(GLFWwindow *window, int width, int height) {
-    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(window));
-    ctx->width = width;
-    ctx->height = height;
-    ctx->Reset();
+bool Window::is_open() {
+    return !glfwWindowShouldClose(m_window);
+}
+int Window::get_width() {
+    return m_width;
+}
+int Window::get_height() {
+    return m_height;
 }
 
-void Window::glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(window));
+void Window::glfw_error_callback(int error, const char *description) {
+    fprintf(stderr, "GLFW error %d: %s\n", error, description);
+}
+
+void Window::glfw_window_size_callback(GLFWwindow *m_window, int width, int height) {
+    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(m_window));
+    ctx->m_width = width;
+    ctx->m_height = height;
+    ctx->reset();
+}
+
+void Window::glfw_key_callback(GLFWwindow *m_window, int key, int scancode, int action, int mods) {
+    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(m_window));
 
 #if ENABLE_IMGUI
-    ctx->overlay.glfw_key_callback(window, key, scancode, action, mods);
+    ctx->m_overlay.glfw_key_callback(m_window, key, scancode, action, mods);
 #else
-    ctx::Inputs::HandleKeyboardInputs(key, action);
+    ctx::Inputs::handle_keyboard_inputs(key, action);
 #endif
 }
 
-void Window::glfw_char_callback(GLFWwindow *window, unsigned int codepoint) {
-    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(window));
+void Window::glfw_char_callback(GLFWwindow *m_window, unsigned int codepoint) {
+    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(m_window));
 
 #if ENABLE_IMGUI
-    ctx->overlay.glfw_char_callback(window, codepoint);
+    ctx->m_overlay.glfw_char_callback(m_window, codepoint);
 #else
 
 #endif
 }
 
-void Window::glfw_mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(window));
+void Window::glfw_mouse_button_callback(GLFWwindow *m_window, int button, int action, int mods) {
+    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(m_window));
 
 #if ENABLE_IMGUI
-    ctx->overlay.glfw_mouse_button_callback(window, button, action, mods);
+    ctx->m_overlay.glfw_mouse_button_callback(m_window, button, action, mods);
 #else
-    ctx::Inputs::HandleMouseInputs(button, action);
+    ctx::Inputs::handle_mouse_inputs(button, action);
 #endif
 }
 
-void Window::glfw_cursor_pos_callback(GLFWwindow *window, double xpos, double ypos) {
-    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(window));
+void Window::glfw_cursor_pos_callback(GLFWwindow *m_window, double xpos, double ypos) {
+    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(m_window));
 
 #if ENABLE_IMGUI
-    ctx->overlay.glfw_cursor_pos_callback(window, xpos, ypos);
+    ctx->m_overlay.glfw_cursor_pos_callback(m_window, xpos, ypos);
 #else
-    ctx::Inputs::HandleCursorPos(xpos, ypos);
+    ctx::Inputs::handle_cursor_pos(xpos, ypos);
 #endif
 }
 
-void Window::glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(window));
+void Window::glfw_scroll_callback(GLFWwindow *m_window, double xoffset, double yoffset) {
+    Window *ctx = static_cast<Window *>(glfwGetWindowUserPointer(m_window));
 
 #if ENABLE_IMGUI
-    ctx->overlay.glfw_scroll_callback(window, xoffset, yoffset);
+    ctx->m_overlay.glfw_scroll_callback(m_window, xoffset, yoffset);
 #else
-    ctx::Inputs::HandleMouseScroll(xoffset, yoffset);
+    ctx::Inputs::handle_mouse_scroll(xoffset, yoffset);
 #endif
 }
 

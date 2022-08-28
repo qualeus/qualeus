@@ -130,6 +130,7 @@ struct Console {
         ScrollToBottom = false;
         AddLog("Welcome to Dear ImGui!");
     }
+
     ~Console() {
         ClearLog();
         for (int i = 0; i < History.Size; i++) free(History[i]);
@@ -144,6 +145,7 @@ struct Console {
         }
         return d;
     }
+
     static int Strnicmp(const char* s1, const char* s2, int n) {
         int d = 0;
         while (n > 0 && (d = toupper(*s2) - toupper(*s1)) == 0 && *s1) {
@@ -153,6 +155,7 @@ struct Console {
         }
         return d;
     }
+
     static char* Strdup(const char* s) {
         IM_ASSERT(s);
         size_t len = strlen(s) + 1;
@@ -160,6 +163,7 @@ struct Console {
         IM_ASSERT(buf);
         return (char*)memcpy(buf, (const void*)s, len);
     }
+
     static void Strtrim(char* s) {
         char* str_end = s + strlen(s);
         while (str_end > s && str_end[-1] == ' ') str_end--;
@@ -182,7 +186,7 @@ struct Console {
         Items.push_back(Strdup(buf));
     }
 
-    void Draw(const char* title, bool* p_open) {
+    void draw(const char* title, bool* p_open) {
         ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
         if (!ImGui::Begin(title, p_open)) {
             ImGui::End();

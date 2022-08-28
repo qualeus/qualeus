@@ -2,20 +2,17 @@
 
 namespace ctx {
 
-Renderer::Renderer() : state(ctx::State()), overlay(ovl::GuiManager(&this->state)) {
+Renderer::Renderer() : m_state(ctx::State()), m_overlay(ovl::GuiManager(&m_state)) {
     const std::string title = "Test";
-    const std::string sim_title = "Qualeus v" + std::to_string(PROJECT_VERSION_MAJOR) + "."  //
-                                  + std::to_string(PROJECT_VERSION_MINOR) + "."              //
-                                  + std::to_string(PROJECT_VERSION_REVISION)                 //
-                                  + " // " + title;                                          //
+    const std::string sim_title = "Qualeus v" + std::to_string(PROJECT_VERSION_MAJOR) + "." + std::to_string(PROJECT_VERSION_MINOR) + "." + std::to_string(PROJECT_VERSION_REVISION) + " // " + title;
 
-    this->window = Window(1000, 800, sim_title);
-    this->state.camera = drw::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 10.0f));
+    m_window = Window(1000, 800, sim_title);
+    m_state.camera = drw::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 10.0f));
 }
 
-void Renderer::Render() {
-    this->window.Render();
-    this->overlay.Setup();
+void Renderer::render() {
+    m_window.render();
+    m_overlay.setup();
 
 #ifdef __EMSCRIPTEN__
     // EM_JS(int, canvas_get_width, (), { return Module.canvas.width; });
@@ -25,55 +22,55 @@ void Renderer::Render() {
 
     /* Loop until the user closes the window */
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(&this->Loop, 0, 1);
+    emscripten_set_main_loop(&Loop, 0, 1);
 #else
 
-    this->LoadShaders();
+    load_shaders();
 
-    while (this->window.isOpen()) { this->Loop(); }
+    while (m_window.is_open()) { loop(); }
 #endif
 
-    this->window.Close();
+    m_window.close();
 }
 
-void Renderer::Loop() {
-    this->state.system.Step();
+void Renderer::loop() {
+    m_state.system.step();
 
-    this->window.PreDraw();
+    m_window.pre_draw();
 
-    drw::Shapes::Reset();
+    drw::Shapes::reset();
 
-    this->Debug();
+    debug();
 
-    this->overlay.DrawGui();
+    m_overlay.draw_gui();
 
-    this->UpdateCamera();
+    update_camera();
 
-    this->DeclareMeshes();
+    declare_meshes();
 
-    this->DrawSystem();
+    draw_system();
 
-    this->DrawMeshes();
+    draw_meshes();
 
-    this->Inputs();
+    inputs();
 
-    this->window.Draw();
+    m_window.draw();
 }
 
-void Renderer::DeclareMeshes() {
-    this->base_mesh = this->DeclareColorMesh();
-    this->circle_mesh = this->DeclareTextureMesh();
+void Renderer::declare_meshes() {
+    m_base_mesh = declare_color_mesh();
+    m_circle_mesh = declare_texture_mesh();
 }
 
-void Renderer::DrawMeshes() {
+void Renderer::draw_meshes() {
     // Circle Mesh => Texture vertex
-    drw::Shapes::Draw(this->circle_mesh, this->circle_shader);
+    drw::Shapes::draw(m_circle_mesh, m_circle_shader);
 
     // Base Mesh => Colors vertex
-    drw::Shapes::Draw(this->base_mesh, this->base_shader);
+    drw::Shapes::draw(m_base_mesh, m_base_shader);
 }
 
-drw::Mesh<drw::VertexCol> Renderer::DeclareColorMesh() {
+drw::Mesh<drw::VertexCol> Renderer::declare_color_mesh() {
     drw::Mesh<drw::VertexCol> mesh = drw::Mesh<drw::VertexCol>();
 
     mesh.declaration.begin();                                                      // init
@@ -84,7 +81,7 @@ drw::Mesh<drw::VertexCol> Renderer::DeclareColorMesh() {
     return mesh;
 }
 
-drw::Mesh<drw::VertexTex> Renderer::DeclareTextureMesh() {
+drw::Mesh<drw::VertexTex> Renderer::declare_texture_mesh() {
     drw::Mesh<drw::VertexTex> mesh = drw::Mesh<drw::VertexTex>();
 
     mesh.declaration.begin();                                                      // init
@@ -96,9 +93,9 @@ drw::Mesh<drw::VertexTex> Renderer::DeclareTextureMesh() {
     return mesh;
 }
 
-void Renderer::UpdateCamera() {
-    const glm::vec3 cpos = this->state.camera.get_position();
-    const glm::vec3 ctrd = this->state.camera.get_towards();
+void Renderer::update_camera() {
+    const glm::vec3 cpos = m_state.camera.get_position();
+    const glm::vec3 ctrd = m_state.camera.get_towards();
 
     const bx::Vec3 at = {cpos.x, cpos.y, cpos.z};
     const bx::Vec3 eye = {ctrd.x, ctrd.y, ctrd.z};
@@ -106,15 +103,14 @@ void Renderer::UpdateCamera() {
     // Set view and projection matrix for view 0.
     float view[16];
     bx::mtxLookAt(view, eye, at);
-    this->state.camera.set_view_matrix(view);
+    m_state.camera.set_view_matrix(view);
 
     float proj[16];
-    bx::mtxProj(proj, this->state.camera.get_fov(), (float)this->window.get_width() / (float)this->window.get_height(), this->state.camera.get_near(), this->state.camera.get_far(),
-                bgfx::getCaps()->homogeneousDepth);
-    this->state.camera.set_proj_matrix(proj);
+    bx::mtxProj(proj, m_state.camera.get_fov(), (float)m_window.get_width() / (float)m_window.get_height(), m_state.camera.get_near(), m_state.camera.get_far(), bgfx::getCaps()->homogeneousDepth);
+    m_state.camera.set_proj_matrix(proj);
 
     bgfx::setViewTransform(0, view, proj);
-    this->state.camera.set_viewport(glm::vec4(0, 0, (float)this->window.get_width(), (float)this->window.get_height()));
+    m_state.camera.set_viewport(glm::vec4(0, 0, (float)m_window.get_width(), (float)m_window.get_height()));
 
     float mtx[16];
     bx::mtxRotateY(mtx, 0.0f);
@@ -128,21 +124,26 @@ void Renderer::UpdateCamera() {
     bgfx::setTransform(mtx);
 }
 
-void Renderer::Debug() {
+void Renderer::debug() {
     bgfx::dbgTextClear();
     const bgfx::Stats *stats = bgfx::getStats();
 
-    const glm::vec3 cam_pos = this->state.camera.get_position();
-    const glm::vec3 cam_tw = this->state.camera.get_towards();
-    const glm::vec4 cam_vp = this->state.camera.get_viewport();
-    const glm::mat4 cam_vw = this->state.camera.get_view_matrix();
-    const glm::mat4 cam_pr = this->state.camera.get_proj_matrix();
-    const glm::vec2 cur_pos = Inputs::MousePosition();
-    const glm::vec3 cur_prj = this->state.camera.projectPoint(glm::vec3(cur_pos.x, cur_pos.y, 0.0f));
+    const glm::vec3 cam_pos = m_state.camera.get_position();
+    const glm::vec3 cam_tw = m_state.camera.get_towards();
+    const glm::vec4 cam_vp = m_state.camera.get_viewport();
+    const glm::mat4 cam_vw = m_state.camera.get_view_matrix();
+    const glm::mat4 cam_pr = m_state.camera.get_proj_matrix();
+    const glm::vec2 cur_pos = Inputs::mouse_position();
+    const glm::vec3 cur_prj = m_state.camera.project_point(glm::vec3(cur_pos.x, cur_pos.y, 0.0f));
 
-    bgfx::dbgTextPrintf(0, 0, 0x0f, "\x1b[15;8m QUALEUS v%i.%i.%i [%s ] \x1b[0m",                //
-                        PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_REVISION,  //
-                        std::string(com::type_name<QUALEUS_PRECISION>()).c_str());               //
+    bgfx::dbgTextPrintf(0,
+                        0,
+                        0x0f,
+                        "\x1b[15;8m QUALEUS v%i.%i.%i [%s ] \x1b[0m",  //
+                        PROJECT_VERSION_MAJOR,
+                        PROJECT_VERSION_MINOR,
+                        PROJECT_VERSION_REVISION,                                   //
+                        std::string(com::type_name<QUALEUS_PRECISION>()).c_str());  //
     bgfx::dbgTextPrintf(0, 1, 0x0f, "\x1b[15;8m Camera: position (%f; %f; %f)\x1b[0m", cam_pos.x, cam_pos.y, cam_pos.z);
     bgfx::dbgTextPrintf(0, 2, 0x0f, "\x1b[15;8m         towards (%f; %f; %f)\x1b[0m", cam_tw.x, cam_tw.y, cam_tw.z);
 
@@ -161,7 +162,7 @@ void Renderer::Debug() {
     bgfx::dbgTextPrintf(0, 15, 0x0f, "\x1b[15;8m Cursor: position (%f; %f)\x1b[0m", cur_pos.x, cur_pos.y);
     bgfx::dbgTextPrintf(0, 16, 0x0f, "\x1b[15;8m         projection (%f; %f; %f)\x1b[0m", cur_prj.x, cur_prj.y, cur_prj.z);
 
-    switch (debug) {
+    switch (m_debug) {
         case 0: bgfx::dbgTextClear(); break;
         case 1: bgfx::setDebug(BGFX_DEBUG_STATS); break;
         case 2: bgfx::setDebug(BGFX_DEBUG_TEXT); break;
@@ -169,75 +170,75 @@ void Renderer::Debug() {
     }
 }
 
-void Renderer::Inputs() {
-    Inputs::HandleMousePosition();
+void Renderer::inputs() {
+    Inputs::handle_mouse_position();
 
-    GlobalInputs();
-    DebugInputs();
-    CameraInputs();
+    global_inputs();
+    debug_inputs();
+    camera_inputs();
 }
 
-void Renderer::GlobalInputs() {
-    if (Inputs::KeyPressed(GLFW_KEY_ESCAPE)) { this->window.Close(); }
+void Renderer::global_inputs() {
+    if (Inputs::key_pressed(GLFW_KEY_ESCAPE)) { m_window.close(); }
 }
 
-void Renderer::DebugInputs() {
-    if (Inputs::KeyPressed(GLFW_KEY_F1)) { debug = (debug + 1) % 3; }
-    if (Inputs::KeyPressed(GLFW_KEY_A)) {
-        const glm::vec2 mouse_pos = Inputs::MousePosition();
-        const glm::vec3 projected = this->state.camera.projectPoint(glm::vec3(mouse_pos.x, mouse_pos.y, 0.0));
-        addCorpse(phy::Circle(projected.x, projected.y, 1.0), 0xffffffff);
+void Renderer::debug_inputs() {
+    if (Inputs::key_pressed(GLFW_KEY_F1)) { m_debug = (m_debug + 1) % 3; }
+    if (Inputs::key_pressed(GLFW_KEY_A)) {
+        const glm::vec2 mouse_pos = Inputs::mouse_position();
+        const glm::vec3 projected = m_state.camera.project_point(glm::vec3(mouse_pos.x, mouse_pos.y, 0.0));
+        add_corpse(phy::Circle(projected.x, projected.y, 1.0), 0xffffffff);
     }
 }
 
-void Renderer::CameraInputs() {
+void Renderer::camera_inputs() {
     const float CAMERA_STEP = 0.05f;
     const float CAMERA_ZOOM = 0.25f;
-    const glm::vec2 cursor = Inputs::MousePosition();
+    const glm::vec2 cursor = Inputs::mouse_position();
 
-    if (Inputs::KeyDown(GLFW_KEY_LEFT)) {
-        this->state.camera.set_position(this->state.camera.get_position() + glm::vec3(CAMERA_STEP, 0, 0));
-        this->state.camera.set_towards(this->state.camera.get_towards() + glm::vec3(CAMERA_STEP, 0, 0));
+    if (Inputs::key_down(GLFW_KEY_LEFT)) {
+        m_state.camera.set_position(m_state.camera.get_position() + glm::vec3(CAMERA_STEP, 0, 0));
+        m_state.camera.set_towards(m_state.camera.get_towards() + glm::vec3(CAMERA_STEP, 0, 0));
     }
 
-    if (Inputs::KeyDown(GLFW_KEY_RIGHT)) {
-        this->state.camera.set_position(this->state.camera.get_position() - glm::vec3(CAMERA_STEP, 0, 0));
-        this->state.camera.set_towards(this->state.camera.get_towards() - glm::vec3(CAMERA_STEP, 0, 0));
+    if (Inputs::key_down(GLFW_KEY_RIGHT)) {
+        m_state.camera.set_position(m_state.camera.get_position() - glm::vec3(CAMERA_STEP, 0, 0));
+        m_state.camera.set_towards(m_state.camera.get_towards() - glm::vec3(CAMERA_STEP, 0, 0));
     }
 
-    if (Inputs::KeyDown(GLFW_KEY_UP)) {
-        this->state.camera.set_position(this->state.camera.get_position() + glm::vec3(0, CAMERA_STEP, 0));
-        this->state.camera.set_towards(this->state.camera.get_towards() + glm::vec3(0, CAMERA_STEP, 0));
+    if (Inputs::key_down(GLFW_KEY_UP)) {
+        m_state.camera.set_position(m_state.camera.get_position() + glm::vec3(0, CAMERA_STEP, 0));
+        m_state.camera.set_towards(m_state.camera.get_towards() + glm::vec3(0, CAMERA_STEP, 0));
     }
 
-    if (Inputs::KeyDown(GLFW_KEY_DOWN)) {
-        this->state.camera.set_position(this->state.camera.get_position() - glm::vec3(0, CAMERA_STEP, 0));
-        this->state.camera.set_towards(this->state.camera.get_towards() - glm::vec3(0, CAMERA_STEP, 0));
+    if (Inputs::key_down(GLFW_KEY_DOWN)) {
+        m_state.camera.set_position(m_state.camera.get_position() - glm::vec3(0, CAMERA_STEP, 0));
+        m_state.camera.set_towards(m_state.camera.get_towards() - glm::vec3(0, CAMERA_STEP, 0));
     }
 
-    if (Inputs::KeyDown(GLFW_KEY_P)) {
-        this->state.camera.set_position(this->state.camera.get_position() + glm::vec3(0, 0, CAMERA_ZOOM));
-        this->state.camera.set_towards(this->state.camera.get_towards() + glm::vec3(0, 0, CAMERA_ZOOM));
+    if (Inputs::key_down(GLFW_KEY_P)) {
+        m_state.camera.set_position(m_state.camera.get_position() + glm::vec3(0, 0, CAMERA_ZOOM));
+        m_state.camera.set_towards(m_state.camera.get_towards() + glm::vec3(0, 0, CAMERA_ZOOM));
     }
 
-    if (Inputs::KeyDown(GLFW_KEY_O)) {
-        this->state.camera.set_position(this->state.camera.get_position() - glm::vec3(0, 0, CAMERA_ZOOM));
-        this->state.camera.set_towards(this->state.camera.get_towards() - glm::vec3(0, 0, CAMERA_ZOOM));
+    if (Inputs::key_down(GLFW_KEY_O)) {
+        m_state.camera.set_position(m_state.camera.get_position() - glm::vec3(0, 0, CAMERA_ZOOM));
+        m_state.camera.set_towards(m_state.camera.get_towards() - glm::vec3(0, 0, CAMERA_ZOOM));
     }
 
-    if (Inputs::MousePressed(GLFW_MOUSE_BUTTON_1)) {
-        glm::vec3 curr_projected_mouse = this->state.camera.projectPoint(glm::vec3(cursor.x, cursor.y, 0.0f));
-        this->drag_projected_mouse = curr_projected_mouse;
+    if (Inputs::mouse_pressed(GLFW_MOUSE_BUTTON_1)) {
+        glm::vec3 curr_projected_mouse = m_state.camera.project_point(glm::vec3(cursor.x, cursor.y, 0.0f));
+        m_drag_projected_mouse = curr_projected_mouse;
 
         bool background_pointed = true;
-        this->state.corpses_selected = {};  // clear selection
+        m_state.corpses_selected = {};  // clear selection
 
         // Pointed corpse dragging
-        for (int i = 0; i < this->state.system.get_corpses_size(); i++) {
-            if (this->state.system.get_corpse(i)->Pointed({curr_projected_mouse.x, curr_projected_mouse.y})) {
+        for (int i = 0; i < m_state.system.get_corpses_size(); i++) {
+            if (m_state.system.get_corpse(i)->pointed({curr_projected_mouse.x, curr_projected_mouse.y})) {
                 // Add the pointed corpse to the selection
-                int pointed_id = this->state.system.get_corpse(i)->get_id();
-                this->state.corpses_selected.push_back(pointed_id);
+                int pointed_id = m_state.system.get_corpse(i)->get_id();
+                m_state.corpses_selected.push_back(pointed_id);
                 background_pointed = false;
                 break;
             }
@@ -245,146 +246,134 @@ void Renderer::CameraInputs() {
 
         // If no corpse is pointed, init the camera dragging
         if (background_pointed) {
-            this->drag_initial_position = this->state.camera.get_position();
-            this->drag_initial_towards = this->state.camera.get_towards();
+            m_drag_initial_position = m_state.camera.get_position();
+            m_drag_initial_towards = m_state.camera.get_towards();
         }
     }
 
     const double DRAG_TOGGLE_OFFSET = 1.0;
-    if (Inputs::MouseDown(GLFW_MOUSE_BUTTON_1)) {
-        glm::vec3 curr_projected_mouse = this->state.camera.projectPoint(glm::vec3(cursor.x, cursor.y, 0.0f));
+    if (Inputs::mouse_down(GLFW_MOUSE_BUTTON_1)) {
+        glm::vec3 curr_projected_mouse = m_state.camera.project_point(glm::vec3(cursor.x, cursor.y, 0.0f));
 
-        if (this->state.corpses_selected.size() > 0) {
+        if (m_state.corpses_selected.size() > 0) {
             // Displace all selected corpses
-            for (int i = 0; i < this->state.corpses_selected.size(); i++) {
-                int id = this->state.corpses_selected[i];
+            for (int i = 0; i < m_state.corpses_selected.size(); i++) {
+                int id = m_state.corpses_selected[i];
 
-                auto found = this->state.system.get_corpse_by_id(id);
+                auto found = m_state.system.get_corpse_by_id(id);
 
                 if (found != nullptr) {
-                    found->Move({curr_projected_mouse.x, curr_projected_mouse.y});
-                    found->Stop();
+                    found->move({curr_projected_mouse.x, curr_projected_mouse.y});
+                    found->stop();
                 }
             }
         } else {
-            glm::vec2 mouse_diff = Inputs::pressed_mouse_diff[GLFW_MOUSE_BUTTON_1];
-            const glm::vec3 diff_projected_mouse = curr_projected_mouse - this->drag_projected_mouse;
+            glm::vec2 mouse_diff = Inputs::pressed_mouse_diff(GLFW_MOUSE_BUTTON_1);
+            const glm::vec3 diff_projected_mouse = curr_projected_mouse - m_drag_projected_mouse;
 
             if (std::abs(mouse_diff.x) > DRAG_TOGGLE_OFFSET || std::abs(mouse_diff.y) > DRAG_TOGGLE_OFFSET) {
-                this->state.camera.set_position(this->drag_initial_position - diff_projected_mouse);
-                this->state.camera.set_towards(this->drag_initial_towards - diff_projected_mouse);
-                this->drag_initial_position = this->state.camera.get_position();
-                this->drag_initial_towards = this->state.camera.get_towards();
+                m_state.camera.set_position(m_drag_initial_position - diff_projected_mouse);
+                m_state.camera.set_towards(m_drag_initial_towards - diff_projected_mouse);
+                m_drag_initial_position = m_state.camera.get_position();
+                m_drag_initial_towards = m_state.camera.get_towards();
             }
         }
     }
 
     const double SCROLL_TOGGLE_OFFSET = 0.1;
-    if (std::abs(Inputs::MouseScroll()) > SCROLL_TOGGLE_OFFSET) {
-        float scroll = Inputs::MouseScroll() * CAMERA_ZOOM;
+    if (std::abs(Inputs::mouse_scroll()) > SCROLL_TOGGLE_OFFSET) {
+        float scroll = Inputs::mouse_scroll() * CAMERA_ZOOM;
 
-        glm::vec3 diff_toward = this->state.camera.get_towards() - this->state.camera.get_position();
-        glm::vec3 zoom_position = this->state.camera.get_position();
+        glm::vec3 diff_toward = m_state.camera.get_towards() - m_state.camera.get_position();
+        glm::vec3 zoom_position = m_state.camera.get_position();
 
-        zoom_position.z = std::clamp(zoom_position.z * (1.0f - scroll), this->state.camera.get_near(), this->state.camera.get_far() - diff_toward.z - 1.0f);
+        zoom_position.z = std::clamp(zoom_position.z * (1.0f - scroll), m_state.camera.get_near(), m_state.camera.get_far() - diff_toward.z - 1.0f);
 
-        this->state.camera.set_position(zoom_position);
-        this->state.camera.set_towards(zoom_position + diff_toward);
+        m_state.camera.set_position(zoom_position);
+        m_state.camera.set_towards(zoom_position + diff_toward);
     }
 }
 
-void Renderer::LoadShaders() {
+void Renderer::load_shaders() {
     const bgfx::Memory *base_vs = drw::Shader::get_base_vs_shader();
     const bgfx::Memory *base_fs = drw::Shader::get_base_fs_shader();
 
-    this->base_shader = drw::Shader::create_program("base", base_vs, base_fs);
+    m_base_shader = drw::Shader::create_program("base", base_vs, base_fs);
 
     const bgfx::Memory *circle_vs = drw::Shader::get_circle_vs_shader();
     const bgfx::Memory *circle_fs = drw::Shader::get_circle_fs_shader();
 
-    this->circle_shader = drw::Shader::create_program("circle", circle_vs, circle_fs);
+    m_circle_shader = drw::Shader::create_program("circle", circle_vs, circle_fs);
 }
 
-void Renderer::addCorpse(phy::Polygon polygon, uint32_t color) {
-    this->state.corpses_colors[polygon.get_id()] = color;
-    this->state.system.addCorpse(polygon);
+void Renderer::add_corpse(phy::Polygon polygon, uint32_t color) {
+    m_state.corpses_colors[polygon.get_id()] = color;
+    m_state.system.add_corpse(polygon);
 }
 
-void Renderer::addCorpse(phy::Circle circle, uint32_t color) {
-    this->state.corpses_colors[circle.get_id()] = color;
-    this->state.system.addCorpse(circle);
+void Renderer::add_corpse(phy::Circle circle, uint32_t color) {
+    m_state.corpses_colors[circle.get_id()] = color;
+    m_state.system.add_corpse(circle);
 }
 
-std::shared_ptr<phy::Corpse> Renderer::getCorpse(int index) const { return this->state.system.get_corpse(index); }
-
-void Renderer::addConstraint(phy::Link link, uint32_t color) {
-    this->state.constraints_colors[link.get_id()] = color;
-    this->state.system.addConstraint(link);
+std::shared_ptr<phy::Corpse> Renderer::get_corpse(int index) const {
+    return m_state.system.get_corpse(index);
 }
 
-void Renderer::addConstraint(phy::Spring spring, uint32_t color) {
-    this->state.constraints_colors[spring.get_id()] = color;
-    this->state.system.addConstraint(spring);
+void Renderer::add_constraint(phy::Link link, uint32_t color) {
+    m_state.constraints_colors[link.get_id()] = color;
+    m_state.system.add_constraint(link);
 }
 
-void Renderer::addConstraint(phy::Slider slider, uint32_t color) {
-    this->state.constraints_colors[slider.get_id()] = color;
-    this->state.system.addConstraint(slider);
+std::shared_ptr<phy::Constraint> Renderer::get_constraint(int index) const {
+    return m_state.system.get_constraint(index);
 }
 
-std::shared_ptr<phy::Constraint> Renderer::getConstraint(int index) const { return this->state.system.get_constraint(index); }
-
-void Renderer::DrawSystem() {
-    for (int i = 0; i < this->state.system.get_corpses_size(); i++) {
-        int corpse_id = this->state.system.get_corpse(i)->get_id();
-        DrawCorpse(this->state.system.get_corpse(i), this->state.corpses_colors[corpse_id]);
+void Renderer::draw_system() {
+    for (int i = 0; i < m_state.system.get_corpses_size(); i++) {
+        int corpse_id = m_state.system.get_corpse(i)->get_id();
+        draw_corpse(m_state.system.get_corpse(i), m_state.corpses_colors[corpse_id]);
     }
 
-    for (int i = 0; i < this->state.system.get_constraints_size(); i++) {
-        int constraint_id = this->state.system.get_constraint(i)->get_id();
-        DrawConstraint(this->state.system.get_constraint(i), this->state.constraints_colors[constraint_id]);
+    for (int i = 0; i < m_state.system.get_constraints_size(); i++) {
+        int constraint_id = m_state.system.get_constraint(i)->get_id();
+        draw_constraint(m_state.system.get_constraint(i), m_state.constraints_colors[constraint_id]);
     }
 
-    for (int i = 0; i < this->state.corpses_selected.size(); i++) {
-        int id = this->state.corpses_selected[i];
-        DrawCorpseSelected(this->state.system.get_corpse_by_id(id), 0xffffffff);
+    for (int i = 0; i < m_state.corpses_selected.size(); i++) {
+        int id = m_state.corpses_selected[i];
+        draw_corpse_selected(m_state.system.get_corpse_by_id(id), 0xffffffff);
     }
 }
 
-void Renderer::DrawCorpse(std::shared_ptr<phy::Corpse> corpse, uint32_t color) {
+void Renderer::draw_corpse(std::shared_ptr<phy::Corpse> corpse, uint32_t color) {
     if (phy::Circle *circle = dynamic_cast<phy::Circle *>(corpse.get())) {
-        DrawCorpseCircle(circle, color);
+        draw_corpse_circle(circle, color);
 
     } else if (phy::Polygon *polygon = dynamic_cast<phy::Polygon *>(corpse.get())) {
-        DrawCorpsePolygon(polygon, color);
+        draw_corpse_polygon(polygon, color);
     }
 }
 
-void Renderer::DrawCorpseSelected(std::shared_ptr<phy::Corpse> corpse, uint32_t color) {
+void Renderer::draw_corpse_selected(std::shared_ptr<phy::Corpse> corpse, uint32_t color) {
     if (phy::Circle *circle = dynamic_cast<phy::Circle *>(corpse.get())) {
-        DrawCorpseCircleSelected(circle, color);
+        draw_corpse_circle_selected(circle, color);
 
     } else if (phy::Polygon *polygon = dynamic_cast<phy::Polygon *>(corpse.get())) {
-        DrawCorpsePolygonSelected(polygon, color);
+        draw_corpse_polygon_selected(polygon, color);
     }
 }
 
-void Renderer::DrawConstraint(std::shared_ptr<phy::Constraint> constraint, uint32_t color) {
-    if (phy::Link *link = dynamic_cast<phy::Link *>(constraint.get())) {
-        DrawConstraintLink(link, color);
-    } else if (phy::Spring *spring = dynamic_cast<phy::Spring *>(constraint.get())) {
-        DrawConstraintSpring(spring, color);
-    } else if (phy::Slider *slider = dynamic_cast<phy::Slider *>(constraint.get())) {
-        DrawConstraintSlider(slider, color);
-    }
+void Renderer::draw_constraint(std::shared_ptr<phy::Constraint> constraint, uint32_t color) {
+    if (phy::Link *link = dynamic_cast<phy::Link *>(constraint.get())) { draw_constraint_link(link, color); }
 }
 
-void Renderer::DrawCorpseCircle(phy::Circle *circle, uint32_t color) {
+void Renderer::draw_corpse_circle(phy::Circle *circle, uint32_t color) {
     const glm::vec3 center = glm::vec3(circle->get_pos_x(), circle->get_pos_y(), 0);
-    drw::Shapes::DrawQuad(this->circle_mesh, center, circle->get_size() / 2.0f, color);
+    drw::Shapes::draw_quad(m_circle_mesh, center, circle->get_size() / 2.0f, color);
 }
 
-void Renderer::DrawCorpsePolygon(phy::Polygon *polygon, uint32_t color) {
+void Renderer::draw_corpse_polygon(phy::Polygon *polygon, uint32_t color) {
     std::vector<gmt::VerticesI> polygon_triangles = polygon->get_polygons();
 
     for (int i = 0; i < polygon_triangles.size(); i++) {
@@ -396,16 +385,16 @@ void Renderer::DrawCorpsePolygon(phy::Polygon *polygon, uint32_t color) {
             polygon_points.push_back(glm::vec3(vertice->x, vertice->y, 0));
         }
 
-        drw::Shapes::DrawPolygon(this->base_mesh, polygon_points, color);
+        drw::Shapes::draw_polygon(m_base_mesh, polygon_points, color);
     }
 }
 
-void Renderer::DrawCorpseCircleSelected(phy::Circle *circle, uint32_t color) {
+void Renderer::draw_corpse_circle_selected(phy::Circle *circle, uint32_t color) {
     const glm::vec3 center = glm::vec3(circle->get_pos_x(), circle->get_pos_y(), 0);
-    drw::Shapes::DrawCircleFanOutlined(this->base_mesh, center, circle->get_size() / 2.0f, 0.1f, color);
+    drw::Shapes::draw_circle_fan_outlined(m_base_mesh, center, circle->get_size() / 2.0f, 0.1f, color);
 }
 
-void Renderer::DrawCorpsePolygonSelected(phy::Polygon *polygon, uint32_t color) {
+void Renderer::draw_corpse_polygon_selected(phy::Polygon *polygon, uint32_t color) {
     std::vector<gmt::VerticesI> polygon_triangles = polygon->get_polygons();
 
     for (int i = 0; i < polygon_triangles.size(); i++) {
@@ -417,12 +406,10 @@ void Renderer::DrawCorpsePolygonSelected(phy::Polygon *polygon, uint32_t color) 
             polygon_points.push_back(glm::vec3(vertice->x, vertice->y, 0));
         }
 
-        drw::Shapes::DrawPolygonOutlined(this->base_mesh, polygon_points, 0.1f, color);
+        drw::Shapes::draw_polygon_outlined(m_base_mesh, polygon_points, 0.1f, color);
     }
 }
 
-void Renderer::DrawConstraintLink(phy::Link *link, uint32_t color) {}
-void Renderer::DrawConstraintSpring(phy::Spring *spring, uint32_t color) {}
-void Renderer::DrawConstraintSlider(phy::Slider *slider, uint32_t color) {}
+void Renderer::draw_constraint_link(phy::Link *link, uint32_t color) { }
 
 }  // namespace ctx

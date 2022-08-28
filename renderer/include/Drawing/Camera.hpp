@@ -13,16 +13,16 @@ namespace drw {
 
 class Camera {
    private:
-    glm::mat4 view;
-    glm::mat4 proj;
+    glm::mat4 m_view;
+    glm::mat4 m_proj;
 
-    glm::vec4 viewport;
-    glm::vec3 position;
-    glm::vec3 towards;
+    glm::vec4 m_viewport;
+    glm::vec3 m_position;
+    glm::vec3 m_towards;
 
-    float fov = 45.0f;
-    float near = 1.0f;
-    float far = 300.0f;
+    float m_fov = 45.0f;
+    float m_near = 1.0f;
+    float m_far = 300.0f;
 
    public:
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 towards = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec4 viewport = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -42,7 +42,7 @@ class Camera {
     void set_viewport(glm::vec4 point);
     glm::vec4 get_viewport() const;
 
-    glm::vec3 projectPoint(glm::vec3 position) const;
+    glm::vec3 project_point(glm::vec3 position) const;
 
     float get_fov() const;
     void set_fov(float fov);

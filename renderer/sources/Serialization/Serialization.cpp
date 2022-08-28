@@ -1,3 +1,3 @@
 #include "../../include/Serialization/Serialization.hpp"
 
-namespace srz {}  // namespace srz
+namespace srl { }  // namespace srl

@@ -2,8 +2,12 @@
 
 namespace drw {
 
-VertexCol::VertexCol(glm::vec3 position, uint32_t color) : Vertex(position) { this->color = color; }
+VertexCol::VertexCol(glm::vec3 _position, uint32_t _color) : Vertex(_position) {
+    color = _color;
+}
 
-VertexCol::VertexCol() : Vertex() { this->color = 0x00000000; }
+VertexCol::VertexCol() : Vertex() {
+    color = 0x00000000;
+}
 
 }  // namespace drw

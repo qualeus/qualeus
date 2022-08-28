@@ -2,11 +2,11 @@
 
 namespace ovl {
 
-void GuiManager::ShowGuiSelection(bool* p_open) {
+void GuiManager::show_gui_selection(bool* p_open) {
     if (ImGui::Begin("Selection", p_open)) {
-        if (this->state->corpses_selected.size() > 0) {
-            int id = this->state->corpses_selected[0];
-            auto corpse = this->state->system.get_corpse_by_id(id);
+        if (m_state->corpses_selected.size() > 0) {
+            int id = m_state->corpses_selected[0];
+            auto corpse = m_state->system.get_corpse_by_id(id);
             ImGui::Text("Selected body id: %i", corpse->get_id());
 
             ImGui::Dummy(ImVec2(0.0f, 7.0f));

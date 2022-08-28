@@ -2,9 +2,11 @@
 
 namespace ovl {
 
-GuiManager::GuiManager(ctx::State* state) { this->state = state; }
+GuiManager::GuiManager(ctx::State* state) {
+    m_state = state;
+}
 
-bgfx::TextureHandle GuiManager::addFont(const std::string font_name, const void* compressed_ttf_data, int compressed_ttf_size, float size_pixels, float icon_pixels) {
+bgfx::TextureHandle GuiManager::add_font(const std::string font_name, const void* compressed_ttf_data, int compressed_ttf_size, float size_pixels, float icon_pixels) {
     ImGuiIO& io = ImGui::GetIO();
 
     /* Setup Icons  */
@@ -30,8 +32,8 @@ bgfx::TextureHandle GuiManager::addFont(const std::string font_name, const void*
     return bgfx::createTexture2D((uint16_t)width, (uint16_t)height, false, 1, bgfx::TextureFormat::BGRA8, 0, bgfx::copy(data, width * height * 4));
 }
 
-void GuiManager::UpdateTheme() {
-    switch (this->state->theme) {
+void GuiManager::update_theme() {
+    switch (m_state->theme) {
         case ctx::Theme::Classic: GuiTheme::ClassicTheme(); break;
         case ctx::Theme::Dark: GuiTheme::DarkTheme(); break;
         case ctx::Theme::Violet: GuiTheme::VioletTheme(); break;
@@ -40,7 +42,7 @@ void GuiManager::UpdateTheme() {
     }
 }
 
-void GuiManager::Setup() {
+void GuiManager::setup() {
     /* ImGui Enable Docking */
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;          // Docking
@@ -52,49 +54,49 @@ void GuiManager::Setup() {
     // io.Fonts->Clear();
 
     // TODO: debug textures, see https://github.com/bkaradzic/bgfx/issues/1233
-    // this->roboto_default = this->addFont("RobotoDefault.ttf", Roboto_compressed_data, Roboto_compressed_size, F_DEFAULT_SIZE, I_DEFAULT_SIZE);
-    // this->roboto_medium = this->addFont("RobotoMedium.ttf", Roboto_compressed_data, Roboto_compressed_size, F_MEDIUM_SIZE, I_MEDIUM_SIZE);
-    // this->roboto_bigger = this->addFont("RobotoBigger.ttf", Roboto_compressed_data, Roboto_compressed_size, F_BIGGER_SIZE, I_BIGGER_SIZE);
-    // this->consolas_smaller = this->addFont("Consolas.ttf", Consolas_compressed_data, Consolas_compressed_size, F_SMALLER_SIZE, I_SMALLER_SIZE);
-    // this->proggy_smaller = this->addFont("ProggyClean.ttf", Proggy_compressed_data, Proggy_compressed_size, F_SMALLER_SIZE, I_SMALLER_SIZE);
+    // m_roboto_default = m_addFont("RobotoDefault.ttf", Roboto_compressed_data, Roboto_compressed_size, F_DEFAULT_SIZE, I_DEFAULT_SIZE);
+    // m_roboto_medium = m_addFont("RobotoMedium.ttf", Roboto_compressed_data, Roboto_compressed_size, F_MEDIUM_SIZE, I_MEDIUM_SIZE);
+    // m_roboto_bigger = m_addFont("RobotoBigger.ttf", Roboto_compressed_data, Roboto_compressed_size, F_BIGGER_SIZE, I_BIGGER_SIZE);
+    // m_consolas_smaller = m_addFont("Consolas.ttf", Consolas_compressed_data, Consolas_compressed_size, F_SMALLER_SIZE, I_SMALLER_SIZE);
+    // m_proggy_smaller = m_addFont("ProggyClean.ttf", Proggy_compressed_data, Proggy_compressed_size, F_SMALLER_SIZE, I_SMALLER_SIZE);
 
     /* Theming */
-    UpdateTheme();
+    update_theme();
 }
 
-void GuiManager::SetupGuiBaseLayout() {
-    ImGuiID dock_main_id = dockspace_id;
-    ImGui::DockBuilderRemoveNode(dockspace_id);
-    ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+void GuiManager::setup_gui_base_layout() {
+    ImGuiID m_dock_main_id = m_dockspace_id;
+    ImGui::DockBuilderRemoveNode(m_dockspace_id);
+    ImGui::DockBuilderAddNode(m_dockspace_id, ImGuiDockNodeFlags_DockSpace);
 
-    ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->WorkSize);
+    ImGui::DockBuilderSetNodeSize(m_dockspace_id, ImGui::GetMainViewport()->WorkSize);
 
-    dockspace_bottom_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, G_BOTTOM_DOCK_SIZE, NULL, &dock_main_id);
-    dockspace_left_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, G_LEFT_DOCK_SIZE, NULL, &dock_main_id);
-    dockspace_right_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, G_RIGHT_DOCK_SIZE, NULL, &dock_main_id);
-    dockspace_up_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up, G_UP_DOCK_SIZE, NULL, &dock_main_id);
+    m_dockspace_bottom_id = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Down, G_BOTTOM_DOCK_SIZE, NULL, &m_dock_main_id);
+    m_dockspace_left_id = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Left, G_LEFT_DOCK_SIZE, NULL, &m_dock_main_id);
+    m_dockspace_right_id = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Right, G_RIGHT_DOCK_SIZE, NULL, &m_dock_main_id);
+    m_dockspace_up_id = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Up, G_UP_DOCK_SIZE, NULL, &m_dock_main_id);
 
-    ImGui::DockBuilderDockWindow("Properties", dockspace_left_id);
-    ImGui::DockBuilderDockWindow("Console", dockspace_bottom_id);
+    ImGui::DockBuilderDockWindow("Properties", m_dockspace_left_id);
+    ImGui::DockBuilderDockWindow("Console", m_dockspace_bottom_id);
     // ImGui::DockBuilderDockWindow("Bar", dockspace_up_id);
 
-    ImGui::DockBuilderFinish(dockspace_id);
+    ImGui::DockBuilderFinish(m_dockspace_id);
 }
 
-void GuiManager::DrawGui() {
+void GuiManager::draw_gui() {
     /* Draw the top menu before everything else */
-    DrawGuiMenu();
+    draw_gui_menu();
 
     /* The Docking must be Before all the sub Windows*/
-    DrawGuiDocking();
+    draw_gui_docking();
 
-    if (this->state->show_gui["imguidemo"]) { ImGui::ShowDemoWindow(&this->state->show_gui["imguidemo"]); }
+    if (m_state->show_gui["imguidemo"]) { ImGui::ShowDemoWindow(&m_state->show_gui["imguidemo"]); }
 
-    if (this->state->show_gui["console"]) { this->console.Draw("Console", &this->state->show_gui["console"]); }
+    if (m_state->show_gui["console"]) { m_console.draw("Console", &m_state->show_gui["console"]); }
 
-    if (this->state->show_gui["settings"]) { ShowGuiSettings(&this->state->show_gui["settings"]); }
+    if (m_state->show_gui["settings"]) { show_gui_settings(&m_state->show_gui["settings"]); }
 
-    if (this->state->show_gui["selection"]) { ShowGuiSelection(&this->state->show_gui["selection"]); }
+    if (m_state->show_gui["selection"]) { show_gui_selection(&m_state->show_gui["selection"]); }
 
     /*
     if (show_gui["properties"]) { ShowGuiProperties(&show_gui["properties"]); }
@@ -103,13 +105,13 @@ void GuiManager::DrawGui() {
     if (show_gui["benchmark"]) { ShowGuiBenchmark(&show_gui["benchmark"]); }
     */
 
-    PopupClearSystem();
+    popup_clear_system();
 }
 
-void GuiManager::DrawGuiDocking() {
+void GuiManager::draw_gui_docking() {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + this->state->side_bar_size + this->state->side_content_size, viewport->WorkPos.y));
-    ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x - this->state->side_bar_size - this->state->side_content_size, viewport->WorkSize.y));
+    ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + m_state->side_bar_size + m_state->side_content_size, viewport->WorkPos.y));
+    ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x - m_state->side_bar_size - m_state->side_content_size, viewport->WorkSize.y));
     ImGui::SetNextWindowViewport(viewport->ID);
 
     ImGuiWindowFlags host_window_flags = 0;
@@ -134,16 +136,16 @@ void GuiManager::DrawGuiDocking() {
 
     ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
 
-    dockspace_id = ImGui::GetID("DockSpace");
+    m_dockspace_id = ImGui::GetID("DockSpace");
 
-    if (this->state->reset_base_layout || ImGui::DockBuilderGetNode(dockspace_id) == NULL) {
-        this->state->reset_base_layout = false;
+    if (m_state->reset_base_layout || ImGui::DockBuilderGetNode(m_dockspace_id) == NULL) {
+        m_state->reset_base_layout = false;
 
-        SetupGuiBaseLayout();
+        setup_gui_base_layout();
     }
 
-    dockspace_id = ImGui::GetID("DockSpace");
-    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+    m_dockspace_id = ImGui::GetID("DockSpace");
+    ImGui::DockSpace(m_dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     ImGui::End();
 }
 

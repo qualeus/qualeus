@@ -17,9 +17,13 @@ static GLFWcursor* g_imgui_cursors[ImGuiMouseCursor_COUNT] = {};
 
 static const bgfx::ViewId g_imgui_view_id = 200;
 
-static const char* imgui_get_clipboard(void* window) { return glfwGetClipboardString((GLFWwindow*)window); }
+static const char* imgui_get_clipboard(void* window) {
+    return glfwGetClipboardString((GLFWwindow*)window);
+}
 
-static void imgui_set_clipboard(void* window, const char* text) { glfwSetClipboardString((GLFWwindow*)window, text); }
+static void imgui_set_clipboard(void* window, const char* text) {
+    glfwSetClipboardString((GLFWwindow*)window, text);
+}
 
 void imgui_init(GLFWwindow* window, bgfx::ProgramHandle program) {
     g_imgui_window = window;
@@ -31,7 +35,11 @@ void imgui_init(GLFWwindow* window, bgfx::ProgramHandle program) {
     ImGuiIO& io = ImGui::GetIO();
 
     // Setup vertex declaration
-    g_imgui_vertex_layout.begin().add(bgfx::Attrib::Position, 2, bgfx::AttribType::Float).add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float).add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true).end();
+    g_imgui_vertex_layout.begin()
+        .add(bgfx::Attrib::Position, 2, bgfx::AttribType::Float)
+        .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+        .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+        .end();
 
     // Create font
     io.Fonts->AddFontDefault();
@@ -80,7 +88,9 @@ void imgui_init(GLFWwindow* window, bgfx::ProgramHandle program) {
     g_imgui_cursors[ImGuiMouseCursor_Hand] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
 }
 
-void imgui_reset(uint16_t width, uint16_t height) { bgfx::setViewRect(g_imgui_view_id, 0, 0, bgfx::BackbufferRatio::Equal); }
+void imgui_reset(uint16_t width, uint16_t height) {
+    bgfx::setViewRect(g_imgui_view_id, 0, 0, bgfx::BackbufferRatio::Equal);
+}
 
 void imgui_events(float dt) {
     ImGuiIO& io = ImGui::GetIO();

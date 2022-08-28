@@ -2,11 +2,17 @@
 
 namespace ovl {
 
-GuiTheme::GuiTheme() {}
+GuiTheme::GuiTheme() { }
 
-void GuiTheme::DarkTheme() { ImGui::StyleColorsDark(); }
-void GuiTheme::VioletTheme() { ImGui::StyleColorsClassic(); }
-void GuiTheme::LightTheme() { ImGui::StyleColorsLight(); }
+void GuiTheme::DarkTheme() {
+    ImGui::StyleColorsDark();
+}
+void GuiTheme::VioletTheme() {
+    ImGui::StyleColorsClassic();
+}
+void GuiTheme::LightTheme() {
+    ImGui::StyleColorsLight();
+}
 void GuiTheme::ClassicTheme() {
     ImVec4 TRANSPARENT_0 = ImVec4(0.00f, 0.00f, 0.00f, 0.0f);
     ImVec4 TRANSPARENT_1 = ImVec4(0.00f, 0.00f, 0.00f, 0.15f);

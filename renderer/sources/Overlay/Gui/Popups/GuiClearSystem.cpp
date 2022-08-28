@@ -2,10 +2,10 @@
 
 namespace ovl {
 
-void GuiManager::PopupClearSystem() {
-    if (this->state->show_gui["popup_clear"]) {
+void GuiManager::popup_clear_system() {
+    if (m_state->show_gui["popup_clear"]) {
         ImGui::OpenPopup("Clear System?");
-        this->state->show_gui["popup_clear"] = false;
+        m_state->show_gui["popup_clear"] = false;
     }
 
     if (ImGui::ValidationPopup("Clear System?",
@@ -15,19 +15,19 @@ void GuiManager::PopupClearSystem() {
                                "     * Constraints\n"
                                "     * Spawners...\n"
                                "\nThis operation cannot be undone !")) {
-        ClearSystem();
+        clear_system();
     }
 }
 
-void GuiManager::ClearSystem() {
+void GuiManager::clear_system() {
     /* Make sure that the arrays are empty */
     /*
-    this->selected_corpses_cursor = {};
-    this->selected_corpses_index = {};
-    this->selected_corpses_fixed = {};
-    this->selected_corpses_diff = {};
-    this->spawners = {};
+    m_selected_corpses_cursor = {};
+    m_selected_corpses_index = {};
+    m_selected_corpses_fixed = {};
+    m_selected_corpses_diff = {};
+    m_spawners = {};
     */
-    this->state->system.Clear();
+    m_state->system.clear();
 }
 }

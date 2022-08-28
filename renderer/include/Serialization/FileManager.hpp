@@ -22,7 +22,7 @@
 // TODO
 #endif
 
-namespace srz {
+namespace srl {
 
 class FileManager {
    private:
@@ -37,6 +37,6 @@ class FileManager {
     static void SaveState(const ctx::State& state, std::string path);
 };
 
-}  // namespace srz
+}  // namespace srl
 
 #endif

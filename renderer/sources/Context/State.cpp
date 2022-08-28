@@ -2,6 +2,6 @@
 
 namespace ctx {
 
-State::State() : system(phy::System()) {}
+State::State() : system(phy::System()) { }
 
 }  // namespace ctx

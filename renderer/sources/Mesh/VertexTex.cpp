@@ -2,14 +2,14 @@
 
 namespace drw {
 
-VertexTex::VertexTex(glm::vec3 position, glm::vec2 texture, uint32_t color) : Vertex(position) {
-    this->texture = texture;
-    this->color = color;
+VertexTex::VertexTex(glm::vec3 _position, glm::vec2 _texture, uint32_t _color) : Vertex(_position) {
+    texture = _texture;
+    color = _color;
 }
 
 VertexTex::VertexTex() : Vertex() {
-    this->texture = glm::vec2();
-    this->color = 0x00000000;
+    texture = glm::vec2();
+    color = 0x00000000;
 }
 
 }  // namespace drw

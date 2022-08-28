@@ -2,29 +2,29 @@
 
 namespace ovl {
 
-void GuiManager::DrawGuiMenu() {
+void GuiManager::draw_gui_menu() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Open", "Ctrl+O")) {
                 std::string path =
-                    srz::FileManager::SelectFile("Open System", srz::FileManager::CurrentPath(), "System (.json, .latio)\0*.json;*.latio\0System (.json)\0*.json\0System (.latio)\0*.latio\0", false);
-                if (path != "") { *this->state = srz::FileManager::LoadState(path); }
+                    srl::FileManager::SelectFile("Open System", srl::FileManager::CurrentPath(), "System (.json, .latio)\0*.json;*.latio\0System (.json)\0*.json\0System (.latio)\0*.latio\0", false);
+                if (path != "") { *m_state = srl::FileManager::LoadState(path); }
             }
 
             if (ImGui::MenuItem("Save", "Ctrl+S")) {
                 std::string path =
-                    srz::FileManager::SelectFile("Save System", srz::FileManager::CurrentPath(), "System (.json, .latio)\0*.json;*.latio\0System (.json)\0*.json\0System (.latio)\0*.latio\0", true);
+                    srl::FileManager::SelectFile("Save System", srl::FileManager::CurrentPath(), "System (.json, .latio)\0*.json;*.latio\0System (.json)\0*.json\0System (.latio)\0*.latio\0", true);
 
-                if (path != "") { srz::FileManager::SaveState(*this->state, path); }
+                if (path != "") { srl::FileManager::SaveState(*m_state, path); }
             }
 
-            if (ImGui::MenuItem("Clear", "Ctrl+R")) { this->state->show_gui["popup_clear"] = true; }
+            if (ImGui::MenuItem("Clear", "Ctrl+R")) { m_state->show_gui["popup_clear"] = true; }
 
             ImGui::Dummy(ImVec2(0.0f, 7.0f));
             ImGui::Separator();
             ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-            if (ImGui::MenuItem("Settings")) { this->state->show_gui["settings"] = true; }
+            if (ImGui::MenuItem("Settings")) { m_state->show_gui["settings"] = true; }
 
             ImGui::Dummy(ImVec2(0.0f, 7.0f));
             ImGui::Separator();
@@ -56,7 +56,7 @@ void GuiManager::DrawGuiMenu() {
 
         if (ImGui::BeginMenu("Tools")) {
             if (ImGui::BeginMenu("Layout")) {
-                if (ImGui::MenuItem("Reset Base Layout")) { this->state->reset_base_layout = true; }
+                if (ImGui::MenuItem("Reset Base Layout")) { m_state->reset_base_layout = true; }
                 ImGui::EndMenu();
             }
 
@@ -65,35 +65,35 @@ void GuiManager::DrawGuiMenu() {
             ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
             ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
-            ImGui::MenuItem("Console", NULL, &this->state->show_gui["console"]);
-            ImGui::MenuItem("Selection", NULL, &this->state->show_gui["selection"]);
-            ImGui::MenuItem("ImGui Demo", NULL, &this->state->show_gui["imguidemo"]);
+            ImGui::MenuItem("Console", NULL, &m_state->show_gui["console"]);
+            ImGui::MenuItem("Selection", NULL, &m_state->show_gui["selection"]);
+            ImGui::MenuItem("ImGui Demo", NULL, &m_state->show_gui["imguidemo"]);
             ImGui::PopItemFlag();
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Debug")) {
             ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
-            ImGui::MenuItem("Quadtree", NULL, &this->state->show_debug["quadtree"]);
-            ImGui::MenuItem("Bounds", NULL, &this->state->show_debug["bounds"]);
-            ImGui::MenuItem("Centroids", NULL, &this->state->show_debug["centroids"]);
-            ImGui::MenuItem("Edges", NULL, &this->state->show_debug["edges"]);
-            ImGui::MenuItem("Projections", NULL, &this->state->show_debug["projections"]);
-            ImGui::MenuItem("Vertices", NULL, &this->state->show_debug["vertices"]);
-            ImGui::MenuItem("Normals", NULL, &this->state->show_debug["normals"]);
-            ImGui::MenuItem("Velocity", NULL, &this->state->show_debug["velocity"]);
-            ImGui::MenuItem("XYVelocity", NULL, &this->state->show_debug["xyvelocity"]);
-            ImGui::MenuItem("Pairs", NULL, &this->state->show_debug["pairs"]);
-            ImGui::MenuItem("QuadPairs", NULL, &this->state->show_debug["quadpairs"]);
-            ImGui::MenuItem("Contacts", NULL, &this->state->show_debug["contacts"]);
-            ImGui::MenuItem("Collisions", NULL, &this->state->show_debug["collisions"]);
+            ImGui::MenuItem("Quadtree", NULL, &m_state->show_debug["quadtree"]);
+            ImGui::MenuItem("Bounds", NULL, &m_state->show_debug["bounds"]);
+            ImGui::MenuItem("Centroids", NULL, &m_state->show_debug["centroids"]);
+            ImGui::MenuItem("Edges", NULL, &m_state->show_debug["edges"]);
+            ImGui::MenuItem("Projections", NULL, &m_state->show_debug["projections"]);
+            ImGui::MenuItem("Vertices2", NULL, &m_state->show_debug["vertices"]);
+            ImGui::MenuItem("Normals", NULL, &m_state->show_debug["normals"]);
+            ImGui::MenuItem("Velocity", NULL, &m_state->show_debug["velocity"]);
+            ImGui::MenuItem("XYVelocity", NULL, &m_state->show_debug["xyvelocity"]);
+            ImGui::MenuItem("Pairs", NULL, &m_state->show_debug["pairs"]);
+            ImGui::MenuItem("QuadPairs", NULL, &m_state->show_debug["quadpairs"]);
+            ImGui::MenuItem("Contacts", NULL, &m_state->show_debug["contacts"]);
+            ImGui::MenuItem("Collisions", NULL, &m_state->show_debug["collisions"]);
             ImGui::PopItemFlag();
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Shaders")) {
             ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
-            ImGui::MenuItem("Grid", NULL, &this->state->post_process["grid"]);
-            ImGui::MenuItem("Gravity", NULL, &this->state->post_process["gravity"]);
-            ImGui::MenuItem("Blur", NULL, &this->state->post_process["blur"]);
+            ImGui::MenuItem("Grid", NULL, &m_state->post_process["grid"]);
+            ImGui::MenuItem("Gravity", NULL, &m_state->post_process["gravity"]);
+            ImGui::MenuItem("Blur", NULL, &m_state->post_process["blur"]);
             ImGui::PopItemFlag();
             ImGui::EndMenu();
         }

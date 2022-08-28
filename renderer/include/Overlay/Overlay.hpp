@@ -39,11 +39,11 @@ class Overlay {
    public:
     Overlay();
 
-    void Initialize(GLFWwindow* window);
-    void Draw();
-    void PollEvents(float dt);
-    void Reset(int width, int height);
-    void Cleanup();
+    void initialize(GLFWwindow* window);
+    void draw();
+    void poll_events(float dt);
+    void reset(int width, int height);
+    void cleanup();
 
     void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
     void glfw_char_callback(GLFWwindow* window, unsigned int codepoint);

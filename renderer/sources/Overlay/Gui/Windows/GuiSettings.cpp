@@ -2,17 +2,7 @@
 
 namespace ovl {
 
-void GuiManager::ShowGuiSettingsInterface() {
-    ImGui::Text("Interface Style");
-
-    ImGui::Dummy(ImVec2(0.0f, 7.0f));
-    ImGui::Separator();
-    ImGui::Dummy(ImVec2(0.0f, 5.0f));
-
-    if (ImGui::Combo("Theme", reinterpret_cast<int*>(&this->state->theme), "Classic\0Dark\0Violet\0Light\0")) { UpdateTheme(); }
-}
-
-void GuiManager::ShowGuiSettings(bool* p_open) {
+void GuiManager::show_gui_settings(bool* p_open) {
     ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
 
     static int selected_menu = 0;
@@ -59,7 +49,13 @@ void GuiManager::ShowGuiSettings(bool* p_open) {
 
     switch (selected_menu) {
         case S_MENU_INTERFACE: {
-            ShowGuiSettingsInterface();
+            ImGui::Text("Interface Style");
+
+            ImGui::Dummy(ImVec2(0.0f, 7.0f));
+            ImGui::Separator();
+            ImGui::Dummy(ImVec2(0.0f, 5.0f));
+
+            if (ImGui::Combo("Theme", reinterpret_cast<int*>(&m_state->theme), "Classic\0Dark\0Violet\0Light\0")) { update_theme(); }
 
             ImGui::Dummy(ImVec2(0.0f, 7.0f));
             ImGui::Separator();
@@ -68,12 +64,12 @@ void GuiManager::ShowGuiSettings(bool* p_open) {
             ImGui::ShowStyleEditor();
         } break;
         case S_MENU_QUALEUS: {
-            INPUT_SLIDER_FLOAT_ACCESSORS(this->state->camera., fov, "FOV", 0.f, 180.f)
-            INPUT_SLIDER_FLOAT_ACCESSORS(this->state->camera., near, "NEAR", 0.f, 300.f)
-            INPUT_SLIDER_FLOAT_ACCESSORS(this->state->camera., far, "FAR", 0.f, 300.f)
+            INPUT_SLIDER_FLOAT_ACCESSORS(m_state->camera., fov, "FOV", 0.f, 180.f)
+            INPUT_SLIDER_FLOAT_ACCESSORS(m_state->camera., near, "NEAR", 0.f, 300.f)
+            INPUT_SLIDER_FLOAT_ACCESSORS(m_state->camera., far, "FAR", 0.f, 300.f)
 
-            INPUT_SLIDER_VEC3_ACCESSORS(this->state->camera., position, "POS", 0.f, 300.f)
-            INPUT_SLIDER_VEC3_ACCESSORS(this->state->camera., towards, "TOW", 0.f, 300.f)
+            INPUT_SLIDER_VEC3_ACCESSORS(m_state->camera., position, "POS", 0.f, 300.f)
+            INPUT_SLIDER_VEC3_ACCESSORS(m_state->camera., towards, "TOW", 0.f, 300.f)
         } break;
         case S_MENU_CONSOLE: {
             ImGui::ShowStyleSelector("style");

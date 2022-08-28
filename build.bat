@@ -1,5 +1,6 @@
 @echo off
-set /A NUM_BUILD_THREADS = %NUMBER_OF_PROCESSORS%
+:: set /A NUM_BUILD_THREADS = %NUMBER_OF_PROCESSORS%
+set /A NUM_BUILD_THREADS = 4
 :menu
 cls
 color 0a

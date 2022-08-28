@@ -1,8 +1,8 @@
 #include "../../include/Serialization/FileManager.hpp"
 
-namespace srz {
+namespace srl {
 
-FileManager::FileManager() {}
+FileManager::FileManager() { }
 
 std::string FileManager::CurrentPath() {
     std::string current_path = "";
@@ -97,4 +97,4 @@ void FileManager::SaveState(const ctx::State& state, std::string path) {
     }
 }
 
-}  // namespace srz
+}  // namespace srl
