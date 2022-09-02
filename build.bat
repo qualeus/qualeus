@@ -37,14 +37,14 @@ if errorlevel 1 pause && cd ..\.. && goto menu
 pause
 cd bin
 Qualeus.exe
-if errorlevel 1 pause
+pause
 cd ..\..\..
 goto menu
 
 :run_debug
 cd build\Debug\bin
 Qualeus.exe
-if errorlevel 1 pause
+pause
 cd ..\..\..
 goto menu
 
@@ -57,14 +57,14 @@ cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release ../.. && cmake --build . -
 if errorlevel 1 pause && cd ..\.. && goto menu
 cd bin
 Qualeus.exe
-if errorlevel 1 pause
+pause
 cd ..\..\..
 goto menu
 
 :run_release
 cd build\Release\bin
 Qualeus.exe
-if errorlevel 1 pause
+pause
 cd ..\..\..
 goto menu
 

@@ -3,10 +3,10 @@
 namespace ctx {
 
 Renderer::Renderer() : m_state(ctx::State()), m_overlay(ovl::GuiManager(&m_state)) {
-    const std::string title = "Test";
+    const std::string title     = "Test";
     const std::string sim_title = "Qualeus v" + std::to_string(PROJECT_VERSION_MAJOR) + "." + std::to_string(PROJECT_VERSION_MINOR) + "." + std::to_string(PROJECT_VERSION_REVISION) + " // " + title;
 
-    m_window = Window(1000, 800, sim_title);
+    m_window       = Window(1000, 800, sim_title);
     m_state.camera = drw::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 10.0f));
 }
 
@@ -33,8 +33,43 @@ void Renderer::render() {
     m_window.close();
 }
 
+void Renderer::system_step() {
+    for (int i = 0; i < 3; i++) { m_state.system.step(); }
+}
+
+void Renderer::spawners_step() {
+    for (int i = 0; i < m_state.spawners.size(); i++) {
+        auto spawner_ref = &m_state.spawners[i];
+
+        if (spawner_ref->last + spawner_ref->delay < m_state.system.get_time()) {
+            spawner_ref->last = m_state.system.get_time();
+
+            // instanciate new corpse for ID increment
+            phy::Corpse corpse = phy::Corpse();
+            corpse.set_pos(m_state.spawners[i].model.get_pos());
+            corpse.set_pos(m_state.spawners[i].model.get_pos());
+            corpse.set_vel(m_state.spawners[i].model.get_vel());
+            corpse.set_acc(m_state.spawners[i].model.get_acc());
+            corpse.set_rot(m_state.spawners[i].model.get_rot());
+            corpse.set_spi(m_state.spawners[i].model.get_spi());
+            corpse.set_tor(m_state.spawners[i].model.get_tor());
+            corpse.set_fixed(m_state.spawners[i].model.get_fixed());
+            corpse.set_etherial(m_state.spawners[i].model.get_etherial());
+            corpse.set_tied(m_state.spawners[i].model.get_tied());
+            corpse.set_shapes(m_state.spawners[i].model.get_copy_shapes());
+
+            add_corpse(corpse, 0x999999ff);
+        }
+
+        if (!m_state.spawners[i].repeat) { com::remove_unordered(i, m_state.spawners); }
+    }
+}
+
 void Renderer::loop() {
-    m_state.system.step();
+
+    spawners_step();
+
+    system_step();
 
     m_window.pre_draw();
 
@@ -48,6 +83,8 @@ void Renderer::loop() {
 
     declare_meshes();
 
+    if (m_state.post_process["grid"]) { draw_background(); }
+
     draw_system();
 
     draw_meshes();
@@ -58,16 +95,23 @@ void Renderer::loop() {
 }
 
 void Renderer::declare_meshes() {
-    m_base_mesh = declare_color_mesh();
+    m_base_mesh   = declare_color_mesh();
     m_circle_mesh = declare_texture_mesh();
+    m_grid_mesh   = declare_reference_mesh();
 }
 
 void Renderer::draw_meshes() {
+
+    // TODO bgfx::getAvailTransientVertexBuffer();
+
+    // Grid Mesh => Reference vertex
+    drw::Shapes::draw(m_grid_mesh, m_grid_shader, 100);
+
     // Circle Mesh => Texture vertex
-    drw::Shapes::draw(m_circle_mesh, m_circle_shader);
+    drw::Shapes::draw(m_circle_mesh, m_circle_shader, 100000);
 
     // Base Mesh => Colors vertex
-    drw::Shapes::draw(m_base_mesh, m_base_shader);
+    drw::Shapes::draw(m_base_mesh, m_base_shader, 100000);
 }
 
 drw::Mesh<drw::VertexCol> Renderer::declare_color_mesh() {
@@ -93,11 +137,24 @@ drw::Mesh<drw::VertexTex> Renderer::declare_texture_mesh() {
     return mesh;
 }
 
+drw::Mesh<drw::VertexRef> Renderer::declare_reference_mesh() {
+    drw::Mesh<drw::VertexRef> mesh = drw::Mesh<drw::VertexRef>();
+
+    mesh.declaration.begin();                                                      // init
+    mesh.declaration.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float);      // vertex
+    mesh.declaration.add(bgfx::Attrib::TexCoord0, 4, bgfx::AttribType::Float);     // texture / resolution
+    mesh.declaration.add(bgfx::Attrib::TexCoord1, 3, bgfx::AttribType::Float);     // camera offset / zoom
+    mesh.declaration.add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true);  // color
+    mesh.declaration.end();                                                        // stop
+
+    return mesh;
+}
+
 void Renderer::update_camera() {
     const glm::vec3 cpos = m_state.camera.get_position();
     const glm::vec3 ctrd = m_state.camera.get_towards();
 
-    const bx::Vec3 at = {cpos.x, cpos.y, cpos.z};
+    const bx::Vec3 at  = {cpos.x, cpos.y, cpos.z};
     const bx::Vec3 eye = {ctrd.x, ctrd.y, ctrd.z};
 
     // Set view and projection matrix for view 0.
@@ -129,10 +186,10 @@ void Renderer::debug() {
     const bgfx::Stats *stats = bgfx::getStats();
 
     const glm::vec3 cam_pos = m_state.camera.get_position();
-    const glm::vec3 cam_tw = m_state.camera.get_towards();
-    const glm::vec4 cam_vp = m_state.camera.get_viewport();
-    const glm::mat4 cam_vw = m_state.camera.get_view_matrix();
-    const glm::mat4 cam_pr = m_state.camera.get_proj_matrix();
+    const glm::vec3 cam_tw  = m_state.camera.get_towards();
+    const glm::vec4 cam_vp  = m_state.camera.get_viewport();
+    const glm::mat4 cam_vw  = m_state.camera.get_view_matrix();
+    const glm::mat4 cam_pr  = m_state.camera.get_proj_matrix();
     const glm::vec2 cur_pos = Inputs::mouse_position();
     const glm::vec3 cur_prj = m_state.camera.project_point(glm::vec3(cur_pos.x, cur_pos.y, 0.0f));
 
@@ -187,14 +244,14 @@ void Renderer::debug_inputs() {
     if (Inputs::key_pressed(GLFW_KEY_A)) {
         const glm::vec2 mouse_pos = Inputs::mouse_position();
         const glm::vec3 projected = m_state.camera.project_point(glm::vec3(mouse_pos.x, mouse_pos.y, 0.0));
-        add_corpse(phy::Circle(projected.x, projected.y, 1.0), 0xffffffff);
+        // add_corpse(phy::Circle(projected.x, projected.y, 1.0), 0xffffffff);
     }
 }
 
 void Renderer::camera_inputs() {
     const float CAMERA_STEP = 0.05f;
-    const float CAMERA_ZOOM = 0.25f;
-    const glm::vec2 cursor = Inputs::mouse_position();
+    const float CAMERA_ZOOM = 0.10f;
+    const glm::vec2 cursor  = Inputs::mouse_position();
 
     if (Inputs::key_down(GLFW_KEY_LEFT)) {
         m_state.camera.set_position(m_state.camera.get_position() + glm::vec3(CAMERA_STEP, 0, 0));
@@ -228,9 +285,9 @@ void Renderer::camera_inputs() {
 
     if (Inputs::mouse_pressed(GLFW_MOUSE_BUTTON_1)) {
         glm::vec3 curr_projected_mouse = m_state.camera.project_point(glm::vec3(cursor.x, cursor.y, 0.0f));
-        m_drag_projected_mouse = curr_projected_mouse;
+        m_drag_projected_mouse         = curr_projected_mouse;
 
-        bool background_pointed = true;
+        bool background_pointed  = true;
         m_state.corpses_selected = {};  // clear selection
 
         // Pointed corpse dragging
@@ -247,7 +304,7 @@ void Renderer::camera_inputs() {
         // If no corpse is pointed, init the camera dragging
         if (background_pointed) {
             m_drag_initial_position = m_state.camera.get_position();
-            m_drag_initial_towards = m_state.camera.get_towards();
+            m_drag_initial_towards  = m_state.camera.get_towards();
         }
     }
 
@@ -263,19 +320,26 @@ void Renderer::camera_inputs() {
                 auto found = m_state.system.get_corpse_by_id(id);
 
                 if (found != nullptr) {
-                    found->move({curr_projected_mouse.x, curr_projected_mouse.y});
-                    found->stop();
+                    found->set_pos({curr_projected_mouse.x, curr_projected_mouse.y});
+
+                    found->set_vel(gmt::VectorI());
+                    found->set_acc(gmt::VectorI());
+                    found->set_spi(gmt::UnitI());
+                    found->set_tor(gmt::UnitI());
                 }
             }
+
         } else {
+
             glm::vec2 mouse_diff = Inputs::pressed_mouse_diff(GLFW_MOUSE_BUTTON_1);
+
             const glm::vec3 diff_projected_mouse = curr_projected_mouse - m_drag_projected_mouse;
 
             if (std::abs(mouse_diff.x) > DRAG_TOGGLE_OFFSET || std::abs(mouse_diff.y) > DRAG_TOGGLE_OFFSET) {
                 m_state.camera.set_position(m_drag_initial_position - diff_projected_mouse);
                 m_state.camera.set_towards(m_drag_initial_towards - diff_projected_mouse);
                 m_drag_initial_position = m_state.camera.get_position();
-                m_drag_initial_towards = m_state.camera.get_towards();
+                m_drag_initial_towards  = m_state.camera.get_towards();
             }
         }
     }
@@ -284,7 +348,7 @@ void Renderer::camera_inputs() {
     if (std::abs(Inputs::mouse_scroll()) > SCROLL_TOGGLE_OFFSET) {
         float scroll = Inputs::mouse_scroll() * CAMERA_ZOOM;
 
-        glm::vec3 diff_toward = m_state.camera.get_towards() - m_state.camera.get_position();
+        glm::vec3 diff_toward   = m_state.camera.get_towards() - m_state.camera.get_position();
         glm::vec3 zoom_position = m_state.camera.get_position();
 
         zoom_position.z = std::clamp(zoom_position.z * (1.0f - scroll), m_state.camera.get_near(), m_state.camera.get_far() - diff_toward.z - 1.0f);
@@ -304,29 +368,42 @@ void Renderer::load_shaders() {
     const bgfx::Memory *circle_fs = drw::Shader::get_circle_fs_shader();
 
     m_circle_shader = drw::Shader::create_program("circle", circle_vs, circle_fs);
+
+    const bgfx::Memory *grid_vs = drw::Shader::get_grid_vs_shader();
+    const bgfx::Memory *grid_fs = drw::Shader::get_grid_fs_shader();
+
+    m_grid_shader = drw::Shader::create_program("grid", grid_vs, grid_fs);
 }
 
-void Renderer::add_corpse(phy::Polygon polygon, uint32_t color) {
-    m_state.corpses_colors[polygon.get_id()] = color;
-    m_state.system.add_corpse(polygon);
+void Renderer::add_corpse(phy::Corpse corpse, uint32_t color) {
+    m_state.corpses_colors[corpse.get_id()] = color;
+    m_state.system.add_corpse(corpse);
 }
 
-void Renderer::add_corpse(phy::Circle circle, uint32_t color) {
-    m_state.corpses_colors[circle.get_id()] = color;
-    m_state.system.add_corpse(circle);
+void Renderer::draw_background() {
+    float width  = (float)m_window.get_width();
+    float height = (float)m_window.get_height();
+
+    glm::vec3 p_origin = glm::vec3(0.f, 0.f, -1.f);
+    glm::vec3 p_normal = glm::vec3(0.f, 0.f, -1.f);
+
+    glm::vec3 cam     = m_state.camera.get_position();
+    glm::vec3 prj_cam = m_state.camera.project_point(m_state.camera.get_position(), p_origin, p_normal);
+
+    glm::vec3 pt1 = m_state.camera.project_point(glm::vec3(0.0f, 0.0f, 0.0f), p_origin, p_normal);
+    glm::vec3 pt2 = m_state.camera.project_point(glm::vec3(width, 0.0f, 0.0f), p_origin, p_normal);
+    glm::vec3 pt3 = m_state.camera.project_point(glm::vec3(width, height, 0.0f), p_origin, p_normal);
+    glm::vec3 pt4 = m_state.camera.project_point(glm::vec3(0.0f, height, 0.0f), p_origin, p_normal);
+
+    glm::vec3 diff = pt3 - pt1;
+
+    // drw::Shapes::draw_plane(m_circle_mesh, pt1, pt2, pt3, pt4, 0xff0000ff);
+    drw::Shapes::draw_plane(m_grid_mesh, pt1, pt2, pt3, pt4, glm::vec2(diff.x, diff.y), glm::vec2(prj_cam.x, prj_cam.y), cam.z, 0xffffffff);
+    // drw::Shapes::draw_plane(m_grid_mesh, pt1, pt2, pt3, pt4, glm::vec2(width, height), glm::vec2(cam.x, cam.y), cam.z, 0xffffffff);
 }
 
 std::shared_ptr<phy::Corpse> Renderer::get_corpse(int index) const {
     return m_state.system.get_corpse(index);
-}
-
-void Renderer::add_constraint(phy::Link link, uint32_t color) {
-    m_state.constraints_colors[link.get_id()] = color;
-    m_state.system.add_constraint(link);
-}
-
-std::shared_ptr<phy::Constraint> Renderer::get_constraint(int index) const {
-    return m_state.system.get_constraint(index);
 }
 
 void Renderer::draw_system() {
@@ -335,10 +412,12 @@ void Renderer::draw_system() {
         draw_corpse(m_state.system.get_corpse(i), m_state.corpses_colors[corpse_id]);
     }
 
+    /*
     for (int i = 0; i < m_state.system.get_constraints_size(); i++) {
         int constraint_id = m_state.system.get_constraint(i)->get_id();
         draw_constraint(m_state.system.get_constraint(i), m_state.constraints_colors[constraint_id]);
     }
+    */
 
     for (int i = 0; i < m_state.corpses_selected.size(); i++) {
         int id = m_state.corpses_selected[i];
@@ -347,69 +426,39 @@ void Renderer::draw_system() {
 }
 
 void Renderer::draw_corpse(std::shared_ptr<phy::Corpse> corpse, uint32_t color) {
-    if (phy::Circle *circle = dynamic_cast<phy::Circle *>(corpse.get())) {
-        draw_corpse_circle(circle, color);
+    for (int i = 0; i < corpse->get_shapes_size(); i++) {
+        std::shared_ptr<phy::Shape> shape = corpse->get_shape(i);
 
-    } else if (phy::Polygon *polygon = dynamic_cast<phy::Polygon *>(corpse.get())) {
-        draw_corpse_polygon(polygon, color);
+        if (phy::Circle *circle = dynamic_cast<phy::Circle *>(shape.get())) { draw_corpse_circle(corpse, circle, color); }
     }
 }
 
 void Renderer::draw_corpse_selected(std::shared_ptr<phy::Corpse> corpse, uint32_t color) {
-    if (phy::Circle *circle = dynamic_cast<phy::Circle *>(corpse.get())) {
-        draw_corpse_circle_selected(circle, color);
+    for (int i = 0; i < corpse->get_shapes_size(); i++) {
+        std::shared_ptr<phy::Shape> shape = corpse->get_shape(i);
 
-    } else if (phy::Polygon *polygon = dynamic_cast<phy::Polygon *>(corpse.get())) {
-        draw_corpse_polygon_selected(polygon, color);
+        if (phy::Circle *circle = dynamic_cast<phy::Circle *>(shape.get())) { draw_corpse_circle_selected(corpse, circle, color); }
     }
 }
 
-void Renderer::draw_constraint(std::shared_ptr<phy::Constraint> constraint, uint32_t color) {
-    if (phy::Link *link = dynamic_cast<phy::Link *>(constraint.get())) { draw_constraint_link(link, color); }
+void Renderer::draw_corpse_circle(std::shared_ptr<phy::Corpse> corpse, phy::Circle *circle, uint32_t color) {
+    gmt::VectorI absolute_centroid = corpse->local_to_global(circle->get_centroid());
+
+    const glm::vec3 center = glm::vec3(absolute_centroid.x, absolute_centroid.y, 0);
+    drw::Shapes::draw_quad(m_circle_mesh, center, circle->get_radius() / 2.0f, color);
+
+    // rotation circle
+    gmt::VectorI absolute_rotational = corpse->local_to_global(circle->get_centroid() + gmt::VectorI(circle->get_radius() / 3.0f, 0));
+
+    const glm::vec3 rotational_center = glm::vec3(absolute_rotational.x, absolute_rotational.y, 0);
+    drw::Shapes::draw_quad(m_circle_mesh, rotational_center, circle->get_radius() / 15.0f, 0xffffffff);
 }
 
-void Renderer::draw_corpse_circle(phy::Circle *circle, uint32_t color) {
-    const glm::vec3 center = glm::vec3(circle->get_pos_x(), circle->get_pos_y(), 0);
-    drw::Shapes::draw_quad(m_circle_mesh, center, circle->get_size() / 2.0f, color);
+void Renderer::draw_corpse_circle_selected(std::shared_ptr<phy::Corpse> corpse, phy::Circle *circle, uint32_t color) {
+    gmt::VectorI absolute_centroid = corpse->local_to_global(circle->get_centroid());
+
+    const glm::vec3 center = glm::vec3(absolute_centroid.x, absolute_centroid.y, 0);
+    drw::Shapes::draw_circle_fan_outlined(m_base_mesh, center, circle->get_radius() / 2.0f, 0.1f, color);
 }
-
-void Renderer::draw_corpse_polygon(phy::Polygon *polygon, uint32_t color) {
-    std::vector<gmt::VerticesI> polygon_triangles = polygon->get_polygons();
-
-    for (int i = 0; i < polygon_triangles.size(); i++) {
-        gmt::VerticesI triangle_vertices = polygon_triangles[i];
-        std::vector<glm::vec3> polygon_points = {};
-
-        for (int j = 0; j < triangle_vertices.vertices.size(); j++) {
-            const std::shared_ptr<gmt::VectorI> vertice = triangle_vertices.vertices[j];
-            polygon_points.push_back(glm::vec3(vertice->x, vertice->y, 0));
-        }
-
-        drw::Shapes::draw_polygon(m_base_mesh, polygon_points, color);
-    }
-}
-
-void Renderer::draw_corpse_circle_selected(phy::Circle *circle, uint32_t color) {
-    const glm::vec3 center = glm::vec3(circle->get_pos_x(), circle->get_pos_y(), 0);
-    drw::Shapes::draw_circle_fan_outlined(m_base_mesh, center, circle->get_size() / 2.0f, 0.1f, color);
-}
-
-void Renderer::draw_corpse_polygon_selected(phy::Polygon *polygon, uint32_t color) {
-    std::vector<gmt::VerticesI> polygon_triangles = polygon->get_polygons();
-
-    for (int i = 0; i < polygon_triangles.size(); i++) {
-        gmt::VerticesI triangle_vertices = polygon_triangles[i];
-        std::vector<glm::vec3> polygon_points = {};
-
-        for (int j = 0; j < triangle_vertices.vertices.size(); j++) {
-            const std::shared_ptr<gmt::VectorI> vertice = triangle_vertices.vertices[j];
-            polygon_points.push_back(glm::vec3(vertice->x, vertice->y, 0));
-        }
-
-        drw::Shapes::draw_polygon_outlined(m_base_mesh, polygon_points, 0.1f, color);
-    }
-}
-
-void Renderer::draw_constraint_link(phy::Link *link, uint32_t color) { }
 
 }  // namespace ctx

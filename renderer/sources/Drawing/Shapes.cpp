@@ -2,31 +2,30 @@
 
 namespace drw {
 
-uint32_t Shapes::triangles = 0;
+uint32_t Shapes::triangles  = 0;
 uint32_t Shapes::rectangles = 0;
-uint32_t Shapes::lines = 0;
-uint32_t Shapes::arrows = 0;
-uint32_t Shapes::circles = 0;
-uint32_t Shapes::springs = 0;
-uint32_t Shapes::polygons = 0;
+uint32_t Shapes::lines      = 0;
+uint32_t Shapes::arrows     = 0;
+uint32_t Shapes::circles    = 0;
+uint32_t Shapes::springs    = 0;
+uint32_t Shapes::polygons   = 0;
 
 Shapes::Shapes() { }
 
 void Shapes::reset() {
-    Shapes::triangles = 0;
+    Shapes::triangles  = 0;
     Shapes::rectangles = 0;
-    Shapes::lines = 0;
-    Shapes::arrows = 0;
-    Shapes::circles = 0;
-    Shapes::springs = 0;
-    Shapes::polygons = 0;
+    Shapes::lines      = 0;
+    Shapes::arrows     = 0;
+    Shapes::circles    = 0;
+    Shapes::springs    = 0;
+    Shapes::polygons   = 0;
 }
 
 template <typename T>
-void Shapes::draw(const Mesh<T>& mesh, const bgfx::ProgramHandle& program) {
+void Shapes::draw(const Mesh<T>& mesh, const bgfx::ProgramHandle& program, uint32_t maxVertices) {
     // TODO:: check availlability with bgfx::getAvailTransientVertexBuffer();
-
-    uint32_t maxVertices = BUFFER_SIZE;
+    // uint32_t maxVertices = BUFFER_SIZE;
     // uint32_t maxIndexes = BUFFER_SIZE;
 
     bgfx::TransientVertexBuffer tvb;
@@ -52,8 +51,9 @@ void Shapes::draw(const Mesh<T>& mesh, const bgfx::ProgramHandle& program) {
     bgfx::setState(state);
     bgfx::submit(0, program);
 }
-template void Shapes::draw<VertexCol>(const Mesh<VertexCol>& mesh, const bgfx::ProgramHandle& program);
-template void Shapes::draw<VertexTex>(const Mesh<VertexTex>& mesh, const bgfx::ProgramHandle& program);
+template void Shapes::draw<VertexCol>(const Mesh<VertexCol>& mesh, const bgfx::ProgramHandle& program, uint32_t maxVertices);
+template void Shapes::draw<VertexTex>(const Mesh<VertexTex>& mesh, const bgfx::ProgramHandle& program, uint32_t maxVertices);
+template void Shapes::draw<VertexRef>(const Mesh<VertexRef>& mesh, const bgfx::ProgramHandle& program, uint32_t maxVertices);
 
 void Shapes::draw_triangle(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, uint32_t color) {
     const int vertices_size = mesh.vertices.size();
@@ -72,17 +72,42 @@ void Shapes::draw_triangle(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const gl
 void Shapes::draw_triangle(Mesh<VertexTex>& mesh,
                            const glm::vec3& pt1,
                            const glm::vec3& pt2,
-                           const glm::vec3& pt3,  //
+                           const glm::vec3& pt3,
                            const glm::vec2& tex1,
                            const glm::vec2& tex2,
                            const glm::vec2& tex3,
-                           uint32_t color) {  //
+                           uint32_t color) {
 
     const int vertices_size = mesh.vertices.size();
 
     mesh.vertices.push_back(VertexTex(glm::vec3(pt1.x, pt1.y, pt1.z), tex1, color));
     mesh.vertices.push_back(VertexTex(glm::vec3(pt2.x, pt2.y, pt2.z), tex2, color));
     mesh.vertices.push_back(VertexTex(glm::vec3(pt3.x, pt3.y, pt3.z), tex3, color));
+
+    mesh.indexes.push_back(vertices_size + 0);
+    mesh.indexes.push_back(vertices_size + 1);
+    mesh.indexes.push_back(vertices_size + 2);
+
+    Shapes::triangles++;
+}
+
+void Shapes::draw_triangle(Mesh<VertexRef>& mesh,
+                           const glm::vec3& pt1,
+                           const glm::vec3& pt2,
+                           const glm::vec3& pt3,
+                           const glm::vec2& tex1,
+                           const glm::vec2& tex2,
+                           const glm::vec2& tex3,
+                           const glm::vec2& res,     // shape real size
+                           const glm::vec2& offset,  // camera offset from origin
+                           const float& zoom,        // camera zoom in absolute,
+                           uint32_t color) {
+
+    const int vertices_size = mesh.vertices.size();
+
+    mesh.vertices.push_back(VertexRef(glm::vec3(pt1.x, pt1.y, pt1.z), tex1, res, offset, zoom, color));
+    mesh.vertices.push_back(VertexRef(glm::vec3(pt2.x, pt2.y, pt2.z), tex2, res, offset, zoom, color));
+    mesh.vertices.push_back(VertexRef(glm::vec3(pt3.x, pt3.y, pt3.z), tex3, res, offset, zoom, color));
 
     mesh.indexes.push_back(vertices_size + 0);
     mesh.indexes.push_back(vertices_size + 1);
@@ -105,6 +130,21 @@ void Shapes::draw_plane(Mesh<VertexTex>& mesh, const glm::vec3& pt1, const glm::
     Shapes::rectangles++;
 }
 
+void Shapes::draw_plane(Mesh<VertexRef>& mesh,
+                        const glm::vec3& pt1,
+                        const glm::vec3& pt2,
+                        const glm::vec3& pt3,
+                        const glm::vec3& pt4,
+                        const glm::vec2& res,     // shape real size
+                        const glm::vec2& offset,  // camera offset from origin
+                        const float& zoom,        // camera zoom in absolute,
+                        uint32_t color) {
+    draw_triangle(mesh, pt1, pt2, pt3, {0, 0}, {1, 0}, {1, 1}, res, offset, zoom, color);
+    draw_triangle(mesh, pt1, pt3, pt4, {0, 0}, {1, 1}, {0, 1}, res, offset, zoom, color);
+
+    Shapes::rectangles++;
+}
+
 template <typename T>
 void Shapes::draw_quad(Mesh<T>& mesh, const glm::vec3& center, const float& radius, uint32_t color) {
     // TODO: normals with screen orientation
@@ -121,8 +161,8 @@ template void Shapes::draw_quad<VertexTex>(Mesh<VertexTex>& mesh, const glm::vec
 template <typename T>
 void Shapes::draw_line(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, uint32_t color) {
     // TODO: normals with screen orientation
-    const glm::vec3 vector = pt2 - pt1;
-    const glm::vec3 normal = glm::vec3(-vector.y, vector.x, vector.z);
+    const glm::vec3 vector     = pt2 - pt1;
+    const glm::vec3 normal     = glm::vec3(-vector.y, vector.x, vector.z);
     const glm::vec3 normalized = glm::normalize(normal) * (thickness / 2.0f);
 
     draw_plane(mesh, pt1 - normalized, pt1 + normalized, pt2 + normalized, pt2 - normalized, color);
@@ -135,12 +175,12 @@ template void Shapes::draw_line<VertexTex>(Mesh<VertexTex>& mesh, const glm::vec
 template <typename T>
 void Shapes::draw_spring(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, const float& width, const int& number_waves, uint32_t color) {
     // TODO: normals with screen orientation
-    const float inv = 0.25f / number_waves;
+    const float inv      = 0.25f / number_waves;
     const glm::vec3 diff = (pt2 - pt1) * inv;
 
-    const float inv2 = width / std::sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+    const float inv2        = width / std::sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
     const glm::vec3 diffpn2 = diff * inv2;
-    const glm::vec3 diff2 = glm::vec3(-diffpn2.y, diffpn2.x, diffpn2.z);
+    const glm::vec3 diff2   = glm::vec3(-diffpn2.y, diffpn2.x, diffpn2.z);
 
     glm::vec3 bpt = pt1;
 
@@ -159,13 +199,13 @@ template void Shapes::draw_spring<VertexTex>(Mesh<VertexTex>& mesh, const glm::v
 
 void Shapes::draw_arrow(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, const float& sz_head, uint32_t color) {
     // TODO: normals with screen orientation
-    const float angle = glm::angle(glm::normalize(pt2), glm::normalize(pt1));
+    const float angle  = glm::angle(glm::normalize(pt2), glm::normalize(pt1));
     const float length = glm::distance(pt1, pt2);
 
-    const glm::vec3 bottom = pt1;
-    const glm::vec3 head = pt2;
-    const glm::vec3 diff = head - bottom;
-    const glm::vec3 normal = glm::vec3(-diff.y, diff.x, diff.z);
+    const glm::vec3 bottom     = pt1;
+    const glm::vec3 head       = pt2;
+    const glm::vec3 diff       = head - bottom;
+    const glm::vec3 normal     = glm::vec3(-diff.y, diff.x, diff.z);
     const glm::vec3 normalized = glm::normalize(normal);
 
     const float ratio = sz_head / glm::distance(bottom, head);
@@ -183,7 +223,7 @@ void Shapes::draw_arrow(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::
 
 template <typename T>
 void Shapes::draw_rectangle(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, uint32_t color) {
-    const glm::vec3 diff = pt2 - pt1;
+    const glm::vec3 diff  = pt2 - pt1;
     const glm::vec3 diffx = glm::vec3(diff.x, 0, 0);
     const glm::vec3 diffy = glm::vec3(0, diff.y, 0);
     const glm::vec3 diffz = glm::vec3(0, 0, diff.z);
@@ -202,7 +242,7 @@ template void Shapes::draw_rectangle<VertexTex>(Mesh<VertexTex>& mesh, const glm
 
 template <typename T>
 void Shapes::draw_rectangle_outlined(Mesh<T>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const float& thickness, uint32_t color) {
-    const glm::vec3 diff = pt2 - pt1;
+    const glm::vec3 diff  = pt2 - pt1;
     const glm::vec3 diffx = glm::vec3(diff.x, 0, 0);
     const glm::vec3 diffy = glm::vec3(0, diff.y, 0);
     const glm::vec3 diffz = glm::vec3(0, 0, diff.z);
@@ -240,8 +280,8 @@ template void Shapes::draw_polygon_outlined<VertexTex>(Mesh<VertexTex>& mesh, co
 
 void Shapes::draw_circle_fan(Mesh<VertexCol>& mesh, const glm::vec3& pt1, float radius, uint32_t color) {
     // Using a triangle fan to draw the circle shape. It's quite inneficient, better use a shader
-    const int circle_resolution = 100;
-    const float fresolution = static_cast<float>(circle_resolution);
+    const int circle_resolution = 20;
+    const float fresolution     = static_cast<float>(circle_resolution);
 
     glm::vec3 previous = glm::vec3(pt1.x + radius, pt1.y, pt1.z);
 
@@ -260,8 +300,8 @@ void Shapes::draw_circle_fan(Mesh<VertexCol>& mesh, const glm::vec3& pt1, float 
 
 void Shapes::draw_circle_fan_outlined(Mesh<VertexCol>& mesh, const glm::vec3& pt1, float radius, const float& thickness, uint32_t color) {
     // Using a triangle fan to draw the circle shape. It's quite inneficient, better use a shader
-    const int circle_resolution = 100;
-    const float fresolution = static_cast<float>(circle_resolution);
+    const int circle_resolution = 20;
+    const float fresolution     = static_cast<float>(circle_resolution);
 
     glm::vec3 previous = glm::vec3(pt1.x + radius, pt1.y, pt1.z);
 

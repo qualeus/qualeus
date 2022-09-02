@@ -3,7 +3,7 @@
 namespace drw {
 Camera::Camera(glm::vec3 position, glm::vec3 towards, glm::vec4 viewport) {
     m_position = position;
-    m_towards = towards;
+    m_towards  = towards;
     m_viewport = viewport;
 }
 
@@ -42,16 +42,12 @@ glm::vec4 Camera::get_viewport() const {
     return m_viewport;
 }
 
-glm::vec3 Camera::project_point(glm::vec3 position) const {
-    float half_y = (m_viewport[3] - m_viewport[1]) - position.y;
+glm::vec3 Camera::project_point(glm::vec3 position, glm::vec3 p_origin, glm::vec3 p_normal) const {
+    float half_y        = (m_viewport[3] - m_viewport[1]) - position.y;
     glm::vec3 flipped_y = glm::vec3(position.x, half_y, position.z);
-    glm::vec3 start = glm::unProject(flipped_y, m_view, m_proj, m_viewport);
-    glm::vec3 end = glm::unProject(flipped_y + glm::vec3(0.0f, 0.0f, -1.0f), m_view, m_proj, m_viewport);
-    glm::vec3 dir = end - start;
-
-    // base plane
-    glm::vec3 p_origin = glm::vec3(0.f, 0.f, 0.f);
-    glm::vec3 p_normal = glm::vec3(0.f, 0.f, -1.f);
+    glm::vec3 start     = glm::unProject(flipped_y, m_view, m_proj, m_viewport);
+    glm::vec3 end       = glm::unProject(flipped_y + glm::vec3(0.0f, 0.0f, -1.0f), m_view, m_proj, m_viewport);
+    glm::vec3 dir       = end - start;
 
     float distance = 0.0f;
 

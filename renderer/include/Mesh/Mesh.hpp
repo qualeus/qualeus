@@ -9,6 +9,7 @@
 
 #include "Vertex.hpp"
 #include "VertexCol.hpp"
+#include "VertexRef.hpp"
 #include "VertexTex.hpp"
 
 namespace drw {

@@ -33,6 +33,18 @@
 #include "../../assets/shaders/circle/vs_shaders/vs_circle_glsl.bin.hpp"
 #include "../../assets/shaders/circle/vs_shaders/vs_circle_metal.bin.hpp"
 
+// grid shader
+#include "../../assets/shaders/grid/fs_shaders/fs_grid_dx11.bin.hpp"
+#include "../../assets/shaders/grid/fs_shaders/fs_grid_dx9.bin.hpp"
+#include "../../assets/shaders/grid/fs_shaders/fs_grid_essl.bin.hpp"
+#include "../../assets/shaders/grid/fs_shaders/fs_grid_glsl.bin.hpp"
+#include "../../assets/shaders/grid/fs_shaders/fs_grid_metal.bin.hpp"
+#include "../../assets/shaders/grid/vs_shaders/vs_grid_dx11.bin.hpp"
+#include "../../assets/shaders/grid/vs_shaders/vs_grid_dx9.bin.hpp"
+#include "../../assets/shaders/grid/vs_shaders/vs_grid_essl.bin.hpp"
+#include "../../assets/shaders/grid/vs_shaders/vs_grid_glsl.bin.hpp"
+#include "../../assets/shaders/grid/vs_shaders/vs_grid_metal.bin.hpp"
+
 namespace drw {
 
 // Triangle mesh
@@ -43,6 +55,9 @@ class Shader {
 
     static const bgfx::Memory *get_circle_vs_shader();
     static const bgfx::Memory *get_circle_fs_shader();
+
+    static const bgfx::Memory *get_grid_vs_shader();
+    static const bgfx::Memory *get_grid_fs_shader();
 
     static bgfx::ProgramHandle create_program(const char *name, const bgfx::Memory *memory_vs, const bgfx::Memory *memory_fs);
 };

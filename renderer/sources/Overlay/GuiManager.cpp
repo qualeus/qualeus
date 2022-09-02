@@ -1,4 +1,4 @@
-#include "../../../include/Overlay/Gui/GuiManager.hpp"
+#include "../../include/Overlay/GuiManager.hpp"
 
 namespace ovl {
 
@@ -12,8 +12,8 @@ bgfx::TextureHandle GuiManager::add_font(const std::string font_name, const void
     /* Setup Icons  */
     static const ImWchar icons_ranges[] = {ICON_MIN_FK, ICON_MAX_FK, 0};
     ImFontConfig icons_cfg;
-    icons_cfg.MergeMode = true;
-    icons_cfg.PixelSnapH = true;
+    icons_cfg.MergeMode        = true;
+    icons_cfg.PixelSnapH       = true;
     icons_cfg.GlyphMinAdvanceX = 13.0f;  // Icons monospaced
 
     /* Setup and add font */
@@ -72,11 +72,14 @@ void GuiManager::setup_gui_base_layout() {
     ImGui::DockBuilderSetNodeSize(m_dockspace_id, ImGui::GetMainViewport()->WorkSize);
 
     m_dockspace_bottom_id = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Down, G_BOTTOM_DOCK_SIZE, NULL, &m_dock_main_id);
-    m_dockspace_left_id = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Left, G_LEFT_DOCK_SIZE, NULL, &m_dock_main_id);
-    m_dockspace_right_id = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Right, G_RIGHT_DOCK_SIZE, NULL, &m_dock_main_id);
-    m_dockspace_up_id = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Up, G_UP_DOCK_SIZE, NULL, &m_dock_main_id);
+    m_dockspace_left_id   = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Left, G_LEFT_DOCK_SIZE, NULL, &m_dock_main_id);
+    m_dockspace_right_id  = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Right, G_RIGHT_DOCK_SIZE, NULL, &m_dock_main_id);
+    m_dockspace_up_id     = ImGui::DockBuilderSplitNode(m_dock_main_id, ImGuiDir_Up, G_UP_DOCK_SIZE, NULL, &m_dock_main_id);
 
-    ImGui::DockBuilderDockWindow("Properties", m_dockspace_left_id);
+    ImGui::DockBuilderDockWindow("Selection", m_dockspace_right_id);
+    ImGui::DockBuilderDockWindow("Spawners", m_dockspace_right_id);
+    ImGui::DockBuilderDockWindow("State", m_dockspace_right_id);
+
     ImGui::DockBuilderDockWindow("Console", m_dockspace_bottom_id);
     // ImGui::DockBuilderDockWindow("Bar", dockspace_up_id);
 
@@ -98,20 +101,15 @@ void GuiManager::draw_gui() {
 
     if (m_state->show_gui["selection"]) { show_gui_selection(&m_state->show_gui["selection"]); }
 
-    /*
-    if (show_gui["properties"]) { ShowGuiProperties(&show_gui["properties"]); }
-    if (show_gui["overlay"]) { ShowGuiOverlay(&show_gui["overlay"]); }
-    if (show_gui["spawner"]) { ShowGuiSpawner(&show_gui["spawner"]); }
-    if (show_gui["benchmark"]) { ShowGuiBenchmark(&show_gui["benchmark"]); }
-    */
+    if (m_state->show_gui["spawners"]) { show_gui_spawner(&m_state->show_gui["spawners"]); }
+
+    if (m_state->show_gui["state"]) { show_gui_state(&m_state->show_gui["state"]); }
 
     popup_clear_system();
 }
 
 void GuiManager::draw_gui_docking() {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + m_state->side_bar_size + m_state->side_content_size, viewport->WorkPos.y));
-    ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x - m_state->side_bar_size - m_state->side_content_size, viewport->WorkSize.y));
     ImGui::SetNextWindowViewport(viewport->ID);
 
     ImGuiWindowFlags host_window_flags = 0;

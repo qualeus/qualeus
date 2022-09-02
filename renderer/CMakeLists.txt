@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 
 # Set the project name and version
-set(PROJECT_RENDERER_NAME ${PROJECT_NAME}_Renderer)
+set(PROJECT_RENDERER_NAME Renderer)
 
 project(${PROJECT_RENDERER_NAME})
 
@@ -24,20 +24,25 @@ set(SOURCES
   sources/Mesh/Mesh.cpp
   sources/Mesh/Vertex.cpp
   sources/Mesh/VertexCol.cpp
+  sources/Mesh/VertexRef.cpp
   sources/Mesh/VertexTex.cpp
 
   sources/Overlay/Overlay.cpp
   sources/Overlay/ImGuiHelper.cpp
 
-  sources/Overlay/Gui/GuiManager.cpp
-  sources/Overlay/Gui/GuiTheme.cpp
-  sources/Overlay/Gui/GuiModule.cpp
+  sources/Overlay/GuiManager.cpp
+  sources/Overlay/GuiTheme.cpp
+  sources/Overlay/GuiModule.cpp
 
-  sources/Overlay/Gui/Windows/GuiMenu.cpp
-  sources/Overlay/Gui/Windows/GuiSelection.cpp
-  sources/Overlay/Gui/Windows/GuiSettings.cpp
+  sources/Overlay/Editor/GuiEditor.cpp
 
-  sources/Overlay/Gui/Popups/GuiClearSystem.cpp
+  sources/Overlay/Windows/GuiMenu.cpp
+  sources/Overlay/Windows/GuiSelection.cpp
+  sources/Overlay/Windows/GuiSettings.cpp
+  sources/Overlay/Windows/GuiSpawner.cpp
+  sources/Overlay/Windows/GuiState.cpp
+
+  sources/Overlay/Popups/GuiClearSystem.cpp
 
   sources/Serialization/FileManager.cpp
   sources/Serialization/Serialization.cpp
@@ -56,14 +61,15 @@ set(HEADERS
   include/Mesh/Mesh.hpp
   include/Mesh/Vertex.hpp
   include/Mesh/VertexCol.hpp
+  include/Mesh/VertexRef.hpp
   include/Mesh/VertexTex.hpp
 
   include/Overlay/Overlay.hpp
   include/Overlay/ImGuiHelper.hpp
 
-  include/Overlay/Gui/GuiManager.hpp
-  include/Overlay/Gui/GuiTheme.hpp
-  include/Overlay/Gui/GuiModule.hpp
+  include/Overlay/GuiManager.hpp
+  include/Overlay/GuiTheme.hpp
+  include/Overlay/GuiModule.hpp
 
   include/Serialization/FileManager.hpp
   include/Serialization/Serialization.hpp

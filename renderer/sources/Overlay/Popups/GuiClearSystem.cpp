@@ -1,4 +1,4 @@
-#include "../../../../include/Overlay/Gui/GuiManager.hpp"
+#include "../../../include/Overlay/GuiManager.hpp"
 
 namespace ovl {
 
@@ -28,6 +28,6 @@ void GuiManager::clear_system() {
     m_selected_corpses_diff = {};
     m_spawners = {};
     */
-    m_state->system.clear();
+    // m_state->system.clear();
 }
 }

@@ -1,4 +1,4 @@
-#include "../../../include/Overlay/Gui/GuiModule.hpp"
+#include "../../include/Overlay/GuiModule.hpp"
 
 namespace ImGui {
 
@@ -20,7 +20,7 @@ void TextCenter(std::string text) {
 
 bool ValidationPopup(std::string title, std::string content) {
     bool always_open = true;
-    bool validated = false;
+    bool validated   = false;
 
     // Always center this window when appearing
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -83,33 +83,31 @@ bool TriCheckBox(const char* label, int* v_tristate) {
     if (*v_tristate == -1) {
         ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, true);
         bool b = false;
-        ret = ImGui::Checkbox(label, &b);
+        ret    = ImGui::Checkbox(label, &b);
         if (ret) { *v_tristate = 1; }
         ImGui::PopItemFlag();
     } else {
         bool b = (*v_tristate != 0);
-        ret = ImGui::Checkbox(label, &b);
+        ret    = ImGui::Checkbox(label, &b);
         if (ret) { *v_tristate = (int)b; }
     }
     return ret;
 }
 
 bool PushButton(const char* str_id, bool* v) {
-    if (v) { }
     if (ImGui::Button(str_id)) { *v = !v; }
-    if (v) { }
 
     return v;
 }
 
 /* Toggle Button  */
 bool ToggleButton(const char* str_id, bool* v) {
-    ImVec4* colors = ImGui::GetStyle().Colors;
-    ImVec2 p = ImGui::GetCursorScreenPos();
+    ImVec4* colors        = ImGui::GetStyle().Colors;
+    ImVec2 p              = ImGui::GetCursorScreenPos();
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
     float height = ImGui::GetFrameHeight();
-    float width = height * 1.55f;
+    float width  = height * 1.55f;
     float radius = height * 0.50f;
 
     ImGui::InvisibleButton(str_id, ImVec2(width, height));
@@ -117,12 +115,12 @@ bool ToggleButton(const char* str_id, bool* v) {
 
     float t = *v ? 1.0f : 0.0f;
 
-    ImGuiContext& g = *GImGui;
+    ImGuiContext& g  = *GImGui;
     float ANIM_SPEED = 0.08f;
     if (g.LastActiveId == g.CurrentWindow->GetID(str_id))  // && g.LastActiveIdTimer < ANIM_SPEED)
     {
         float t_anim = ImSaturate(g.LastActiveIdTimer / ANIM_SPEED);
-        t = *v ? (t_anim) : (1.0f - t_anim);
+        t            = *v ? (t_anim) : (1.0f - t_anim);
     }
 
     ImU32 col_bg;

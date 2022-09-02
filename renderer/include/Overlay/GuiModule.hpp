@@ -13,20 +13,74 @@
 #define TRANSFORM_GETTER(object, property) object get_##property()
 #define TRANSFORM_SETTER(object, property, value) object set_##property(value)
 
-#define INPUT_SLIDER_FLOAT_ACCESSORS(object, property, label, min, max)             \
-    {                                                                               \
-        {                                                                           \
-            float temp_value = TRANSFORM_GETTER(object, property);                  \
-            bool edited = ImGui::SliderFloat(label, &temp_value, min, max, "%.1f"); \
-            if (edited) TRANSFORM_SETTER(object, property, temp_value);             \
-        }                                                                           \
+#define INPUT_BOOL_ACCESSORS(object, property, label)                   \
+    {                                                                   \
+        {                                                               \
+            bool temp_value = TRANSFORM_GETTER(object, property);       \
+            bool edited     = ImGui::Checkbox(label, &temp_value);      \
+            if (edited) TRANSFORM_SETTER(object, property, temp_value); \
+        }                                                               \
+    }
+
+#define INPUT_FLOAT_ACCESSORS(object, property, label)                                    \
+    {                                                                                     \
+        {                                                                                 \
+            float temp_value = TRANSFORM_GETTER(object, property);                        \
+            bool edited      = ImGui::InputFloat(label, &temp_value, 0.1f, 1.0f, "%.1f"); \
+            if (edited) TRANSFORM_SETTER(object, property, temp_value);                   \
+        }                                                                                 \
+    }
+
+#define INPUT_FLOAT2_ACCESSORS(object, property1, propery2, label, speed, min, max)                            \
+    {                                                                                                          \
+        {                                                                                                      \
+            float temp_values[2] = {TRANSFORM_GETTER(object, property1), TRANSFORM_GETTER(object, property2)}; \
+            bool edited          = ImGui::DragFloat2(label, temp_values, speed, min, max "%.1f");              \
+            if (edited) {                                                                                      \
+                TRANSFORM_SETTER(object, property1, temp_values[0]);                                           \
+                TRANSFORM_SETTER(object, property2, temp_values[1]);                                           \
+            }                                                                                                  \
+        }                                                                                                      \
+    }
+
+#define INPUT_VECTOR2_ACCESSORS(object, property, speed, min, max, label)                                        \
+    {                                                                                                            \
+        {                                                                                                        \
+            float temp_values[2] = {TRANSFORM_GETTER(object, property).x, TRANSFORM_GETTER(object, property).y}; \
+            bool edited          = ImGui::DragFloat2(label, temp_values, speed, min, max, "%.1f");               \
+            if (edited) {                                                                                        \
+                gmt::VectorI temp = {temp_values[0], temp_values[1]};                                            \
+                TRANSFORM_SETTER(object, property, temp);                                                        \
+            }                                                                                                    \
+        }                                                                                                        \
+    }
+
+#define INPUT_SLIDER_VECTOR2_ACCESSORS(object, property, label, min, max)                                        \
+    {                                                                                                            \
+        {                                                                                                        \
+            float temp_values[2] = {TRANSFORM_GETTER(object, property).x, TRANSFORM_GETTER(object, property).y}; \
+            bool edited          = ImGui::SliderFloat2(label, temp_values, min, max);                            \
+            if (edited) {                                                                                        \
+                gmt::VectorI temp = {temp_values[0], temp_values[1]};                                            \
+                TRANSFORM_SETTER(object, property, temp);                                                        \
+            }                                                                                                    \
+        }                                                                                                        \
+    }
+
+#define INPUT_SLIDER_FLOAT_ACCESSORS(object, property, label, min, max)                  \
+    {                                                                                    \
+        {                                                                                \
+            float temp_value = TRANSFORM_GETTER(object, property);                       \
+            bool edited      = ImGui::SliderFloat(label, &temp_value, min, max, "%.1f"); \
+            if (edited) TRANSFORM_SETTER(object, property, temp_value);                  \
+        }                                                                                \
     }
 
 #define INPUT_SLIDER_FLOAT2_ACCESSORS(object, property1, propery2, label, min, max)                            \
     {                                                                                                          \
         {                                                                                                      \
             float temp_values[2] = {TRANSFORM_GETTER(object, property1), TRANSFORM_GETTER(object, property2)}; \
-            bool edited = ImGui::SliderFloat2(label, temp_values, min, max);                                   \
+            bool edited          = ImGui::SliderFloat2(label, temp_values, min, max);                          \
             if (edited) {                                                                                      \
                 TRANSFORM_SETTER(object, property1, temp_values[0]);                                           \
                 TRANSFORM_SETTER(object, property2, temp_values[1]);                                           \
@@ -37,27 +91,27 @@
 #define INPUT_SLIDER_VEC3_ACCESSORS(object, property, label, min, max)                                                     \
     {                                                                                                                      \
         {                                                                                                                  \
-            glm::vec3 holder = TRANSFORM_GETTER(object, property);                                                         \
+            glm::vec3 holder     = TRANSFORM_GETTER(object, property);                                                     \
             float temp_values[3] = {holder.x, holder.y, holder.z};                                                         \
-            bool edited = ImGui::SliderFloat3(label, temp_values, min, max);                                               \
+            bool edited          = ImGui::SliderFloat3(label, temp_values, min, max);                                      \
             if (edited) { TRANSFORM_SETTER(object, property, glm::vec3(temp_values[0], temp_values[1], temp_values[2])); } \
         }                                                                                                                  \
     }
 
-#define INPUT_SLIDER_INT_ACCESSORS(object, property, label, min, max)           \
-    {                                                                           \
-        {                                                                       \
-            int temp_value = TRANSFORM_GETTER(object, property);                \
-            bool edited = ImGui::SliderInt(label, &temp_value, min, max, "%d"); \
-            if (edited) TRANSFORM_SETTER(object, property, temp_value);         \
-        }                                                                       \
+#define INPUT_SLIDER_INT_ACCESSORS(object, property, label, min, max)              \
+    {                                                                              \
+        {                                                                          \
+            int temp_value = TRANSFORM_GETTER(object, property);                   \
+            bool edited    = ImGui::SliderInt(label, &temp_value, min, max, "%d"); \
+            if (edited) TRANSFORM_SETTER(object, property, temp_value);            \
+        }                                                                          \
     }
 
 #define INPUT_SLIDER_INT2_ACCESSORS(object, property1, propery2, label, min, max)                            \
     {                                                                                                        \
         {                                                                                                    \
             int temp_values[2] = {TRANSFORM_GETTER(object, property1), TRANSFORM_GETTER(object, property2)}; \
-            bool edited = ImGui::DragInt2(label, temp_values, 1.0f, min, max, "%d");                         \
+            bool edited        = ImGui::DragInt2(label, temp_values, 1.0f, min, max, "%d");                  \
             if (edited) {                                                                                    \
                 TRANSFORM_SETTER(object, property1, temp_values[0]);                                         \
                 TRANSFORM_SETTER(object, property2, temp_values[1]);                                         \
@@ -65,29 +119,29 @@
         }                                                                                                    \
     }
 
-#define INPUT_COLOR_ACCESSORS(object, property, label, min, max)                                                                    \
-    {                                                                                                                               \
-        {                                                                                                                           \
-            float temp_holder[4] = static_cast<int*>(TRANSFORM_GETTER(object, property));                                           \
-            float temp_value[4] = {temp_holder[0] / 255.f, temp_holder[1] / 255.f, temp_holder[2] / 255.f, temp_holder[3] / 255.f}; \
-            bool edited = ImGui::ColorEdit4(label, temp_value);                                                                     \
-            if (edited) {                                                                                                           \
-                temp_holder = {temp_value[0] * 255.f, temp_value[1] * 255.f, temp_value[2] * 255.f, temp_value[3] * 255.f};         \
-                TRANSFORM_SETTER(object, property, temp_holder);                                                                    \
-            }                                                                                                                       \
-        }                                                                                                                           \
+#define INPUT_COLOR_ACCESSORS(object, property, label, min, max)                                                                     \
+    {                                                                                                                                \
+        {                                                                                                                            \
+            float temp_holder[4] = static_cast<int*>(TRANSFORM_GETTER(object, property));                                            \
+            float temp_value[4]  = {temp_holder[0] / 255.f, temp_holder[1] / 255.f, temp_holder[2] / 255.f, temp_holder[3] / 255.f}; \
+            bool edited          = ImGui::ColorEdit4(label, temp_value);                                                             \
+            if (edited) {                                                                                                            \
+                temp_holder = {temp_value[0] * 255.f, temp_value[1] * 255.f, temp_value[2] * 255.f, temp_value[3] * 255.f};          \
+                TRANSFORM_SETTER(object, property, temp_holder);                                                                     \
+            }                                                                                                                        \
+        }                                                                                                                            \
     }
 
-#define INPUT_FLOAT_LIST_ACCESSORS(object, property, labels, values, label)                    \
-    {                                                                                          \
-        {                                                                                      \
-            float temp_value = TRANSFORM_GETTER(object, property);                             \
-            int index = 0;                                                                     \
-            const char* temp_labels[] = labels;                                                \
-            const float temp_values[] = values;                                                \
-            bool edited = ImGui::Combo(label, &index, temp_labels, IM_ARRAYSIZE(temp_labels)); \
-            if (edited) TRANSFORM_SETTER(object, property, temp_values[index]);                \
-        }                                                                                      \
+#define INPUT_FLOAT_LIST_ACCESSORS(object, property, labels, values, label)                                  \
+    {                                                                                                        \
+        {                                                                                                    \
+            float temp_value          = TRANSFORM_GETTER(object, property);                                  \
+            int index                 = 0;                                                                   \
+            const char* temp_labels[] = labels;                                                              \
+            const float temp_values[] = values;                                                              \
+            bool edited               = ImGui::Combo(label, &index, temp_labels, IM_ARRAYSIZE(temp_labels)); \
+            if (edited) TRANSFORM_SETTER(object, property, temp_values[index]);                              \
+        }                                                                                                    \
     }
 
 namespace ImGui {
@@ -126,7 +180,7 @@ struct Console {
         Commands.push_back("HISTORY");
         Commands.push_back("CLEAR");
         Commands.push_back("CLASSIFY");
-        AutoScroll = true;
+        AutoScroll     = true;
         ScrollToBottom = false;
         AddLog("Welcome to Dear ImGui!");
     }
@@ -159,7 +213,7 @@ struct Console {
     static char* Strdup(const char* s) {
         IM_ASSERT(s);
         size_t len = strlen(s) + 1;
-        void* buf = malloc(len);
+        void* buf  = malloc(len);
         IM_ASSERT(buf);
         return (char*)memcpy(buf, (const void*)s, len);
     }
@@ -275,10 +329,10 @@ struct Console {
             ImVec4 color;
             bool has_color = false;
             if (strstr(item, "[error]")) {
-                color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f);
+                color     = ImVec4(1.0f, 0.4f, 0.4f, 1.0f);
                 has_color = true;
             } else if (strncmp(item, "# ", 2) == 0) {
-                color = ImVec4(1.0f, 0.8f, 0.6f, 1.0f);
+                color     = ImVec4(1.0f, 0.8f, 0.6f, 1.0f);
                 has_color = true;
             }
             if (has_color) ImGui::PushStyleColor(ImGuiCol_Text, color);
@@ -295,7 +349,7 @@ struct Console {
         ImGui::Separator();
 
         // Command-line
-        bool reclaim_focus = false;
+        bool reclaim_focus                   = false;
         ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
         if (ImGui::InputText("Input", InputBuf, IM_ARRAYSIZE(InputBuf), input_text_flags, &TextEditCallbackStub, (void*)this)) {
             char* s = InputBuf;
@@ -356,7 +410,7 @@ struct Console {
                 // Example of TEXT COMPLETION
 
                 // Locate beginning of current word
-                const char* word_end = data->Buf + data->CursorPos;
+                const char* word_end   = data->Buf + data->CursorPos;
                 const char* word_start = word_end;
                 while (word_start > data->Buf) {
                     const char c = word_start[-1];
@@ -382,7 +436,7 @@ struct Console {
                     // So inputing "C"+Tab will complete to "CL" then display "CLEAR" and "CLASSIFY" as matches.
                     int match_len = (int)(word_end - word_start);
                     for (;;) {
-                        int c = 0;
+                        int c                       = 0;
                         bool all_candidates_matches = true;
                         for (int i = 0; i < candidates.Size && all_candidates_matches; i++)
                             if (i == 0) c = toupper(candidates[i][match_len]);

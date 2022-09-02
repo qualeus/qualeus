@@ -10,11 +10,12 @@
 #include "../Mesh/Mesh.hpp"
 #include "../Mesh/Vertex.hpp"
 #include "../Mesh/VertexCol.hpp"
+#include "../Mesh/VertexRef.hpp"
 #include "../Mesh/VertexTex.hpp"
 
 namespace drw {
 
-#define BUFFER_SIZE 100000
+#define BUFFER_SIZE 50000
 
 class Shapes {
    private:
@@ -30,14 +31,41 @@ class Shapes {
     static uint32_t polygons;
 
     template <typename T>
-    static void draw(const Mesh<T>& mesh, const bgfx::ProgramHandle& program);
+    static void draw(const Mesh<T>& mesh, const bgfx::ProgramHandle& program, uint32_t maxVertices);
 
     static void draw_triangle(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, uint32_t color);
-    static void
-    draw_triangle(Mesh<VertexTex>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec2& tex1, const glm::vec2& tex2, const glm::vec2& tex3, uint32_t color);
+    static void draw_triangle(Mesh<VertexTex>& mesh,
+                              const glm::vec3& pt1,  // vertices positions
+                              const glm::vec3& pt2,
+                              const glm::vec3& pt3,
+                              const glm::vec2& tex1,  // vertices texture points
+                              const glm::vec2& tex2,
+                              const glm::vec2& tex3,
+                              uint32_t color);
+
+    static void draw_triangle(Mesh<VertexRef>& mesh,
+                              const glm::vec3& pt1,  // vertices positions
+                              const glm::vec3& pt2,
+                              const glm::vec3& pt3,
+                              const glm::vec2& tex1,  // vertices texture points
+                              const glm::vec2& tex2,
+                              const glm::vec2& tex3,
+                              const glm::vec2& res,     // shape real size
+                              const glm::vec2& offset,  // camera offset from origin
+                              const float& zoom,        // camera zoom in absolute
+                              uint32_t color);
 
     static void draw_plane(Mesh<VertexCol>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec3& pt4, uint32_t color);
     static void draw_plane(Mesh<VertexTex>& mesh, const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec3& pt4, uint32_t color);
+    static void draw_plane(Mesh<VertexRef>& mesh,
+                           const glm::vec3& pt1,
+                           const glm::vec3& pt2,
+                           const glm::vec3& pt3,
+                           const glm::vec3& pt4,
+                           const glm::vec2& res,     // shape real size
+                           const glm::vec2& offset,  // camera offset from origin
+                           const float& zoom,        // camera zoom in absolute
+                           uint32_t color);
 
     template <typename T>
     static void draw_quad(Mesh<T>& mesh, const glm::vec3& center, const float& radius, uint32_t color);

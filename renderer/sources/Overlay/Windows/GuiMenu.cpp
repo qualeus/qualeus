@@ -1,4 +1,4 @@
-#include "../../../../include/Overlay/Gui/GuiManager.hpp"
+#include "../../../include/Overlay/GuiManager.hpp"
 
 namespace ovl {
 
@@ -65,35 +65,26 @@ void GuiManager::draw_gui_menu() {
             ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
             ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
-            ImGui::MenuItem("Console", NULL, &m_state->show_gui["console"]);
             ImGui::MenuItem("Selection", NULL, &m_state->show_gui["selection"]);
+            ImGui::MenuItem("Spawners", NULL, &m_state->show_gui["spawners"]);
+            ImGui::MenuItem("State", NULL, &m_state->show_gui["state"]);
+            ImGui::MenuItem("Console", NULL, &m_state->show_gui["console"]);
+
+            ImGui::Separator();
+
             ImGui::MenuItem("ImGui Demo", NULL, &m_state->show_gui["imguidemo"]);
             ImGui::PopItemFlag();
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Debug")) {
             ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
-            ImGui::MenuItem("Quadtree", NULL, &m_state->show_debug["quadtree"]);
-            ImGui::MenuItem("Bounds", NULL, &m_state->show_debug["bounds"]);
-            ImGui::MenuItem("Centroids", NULL, &m_state->show_debug["centroids"]);
-            ImGui::MenuItem("Edges", NULL, &m_state->show_debug["edges"]);
-            ImGui::MenuItem("Projections", NULL, &m_state->show_debug["projections"]);
-            ImGui::MenuItem("Vertices2", NULL, &m_state->show_debug["vertices"]);
-            ImGui::MenuItem("Normals", NULL, &m_state->show_debug["normals"]);
-            ImGui::MenuItem("Velocity", NULL, &m_state->show_debug["velocity"]);
-            ImGui::MenuItem("XYVelocity", NULL, &m_state->show_debug["xyvelocity"]);
-            ImGui::MenuItem("Pairs", NULL, &m_state->show_debug["pairs"]);
-            ImGui::MenuItem("QuadPairs", NULL, &m_state->show_debug["quadpairs"]);
             ImGui::MenuItem("Contacts", NULL, &m_state->show_debug["contacts"]);
-            ImGui::MenuItem("Collisions", NULL, &m_state->show_debug["collisions"]);
             ImGui::PopItemFlag();
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Shaders")) {
             ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true);
             ImGui::MenuItem("Grid", NULL, &m_state->post_process["grid"]);
-            ImGui::MenuItem("Gravity", NULL, &m_state->post_process["gravity"]);
-            ImGui::MenuItem("Blur", NULL, &m_state->post_process["blur"]);
             ImGui::PopItemFlag();
             ImGui::EndMenu();
         }

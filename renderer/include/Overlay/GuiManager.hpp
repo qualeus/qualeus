@@ -7,15 +7,15 @@
 
 #include <Common/String.hpp>
 
-#include "../../../assets/fonts/consolas.hpp"
-#include "../../../assets/fonts/forkawersome.hpp"
-#include "../../../assets/fonts/icons.hpp"
-#include "../../../assets/fonts/proggy.hpp"
-#include "../../../assets/fonts/roboto.hpp"
-#include "../../../assets/icon/ricon.hpp"
-#include "../../Context/State.hpp"
-#include "../../Serialization/FileManager.hpp"
-#include "../../Serialization/Serialization.hpp"
+#include "../../assets/fonts/consolas.hpp"
+#include "../../assets/fonts/forkawersome.hpp"
+#include "../../assets/fonts/icons.hpp"
+#include "../../assets/fonts/proggy.hpp"
+#include "../../assets/fonts/roboto.hpp"
+#include "../../assets/icon/ricon.hpp"
+#include "../Context/State.hpp"
+#include "../Serialization/FileManager.hpp"
+#include "../Serialization/Serialization.hpp"
 #include "Config.hpp"
 #include "GuiModule.hpp"
 #include "GuiTheme.hpp"
@@ -57,6 +57,15 @@ class GuiManager {
 
     void show_gui_settings(bool* p_open);
     void show_gui_selection(bool* p_open);
+    void show_gui_spawner(bool* p_open);
+    void show_gui_state(bool* p_open);
+
+    void show_tab_new_spawner();
+    void show_tab_list_spawners();
+
+    void editor_corpse(phy::Corpse* corpse);
+    void editor_shape(phy::Shape* shape);
+    void editor_circle(phy::Circle* circle);
 };
 
 }  // namespace ovl

@@ -20,9 +20,9 @@ class Camera {
     glm::vec3 m_position;
     glm::vec3 m_towards;
 
-    float m_fov = 45.0f;
+    float m_fov  = 45.0f;
     float m_near = 1.0f;
-    float m_far = 300.0f;
+    float m_far  = 300.0f;
 
    public:
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 towards = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec4 viewport = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -41,8 +41,15 @@ class Camera {
 
     void set_viewport(glm::vec4 point);
     glm::vec4 get_viewport() const;
-
-    glm::vec3 project_point(glm::vec3 position) const;
+    /**
+     * @brief Project a given point from the camera plane to a given world plane
+     *
+     * @param position glm::vec3 camera position
+     * @param p_origin glm::vec3 world plane origin (default: (0.f, 0.f, 0.f))
+     * @param p_normal glm::vec3 world plane normal (default: (0.f, 0.f, -1.f))
+     * @return glm::vec3
+     */
+    glm::vec3 project_point(glm::vec3 position, glm::vec3 p_origin = glm::vec3(0.f, 0.f, 0.f), glm::vec3 p_normal = glm::vec3(0.f, 0.f, -1.f)) const;
 
     float get_fov() const;
     void set_fov(float fov);

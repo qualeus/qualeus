@@ -13,7 +13,7 @@ message("Building ${PROJECT_NAME} VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VER
 
 # Build targets
 option(BUILD_TESTS "Building the engine tests" OFF)
-option(BUILD_SHADERS "Building the renderer shaders" ON)
+option(BUILD_SHADERS "Building the renderer shaders" OFF)
 option(BUILD_DOCS "Building only the documentation" OFF)
 
 # Configure dependencies for build static libraries only.
@@ -54,6 +54,6 @@ else()
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/engine/include")
 
     add_subdirectory(renderer)
-    target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_Renderer)
+    target_link_libraries(${PROJECT_NAME} Renderer)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/renderer/include")
 endif()

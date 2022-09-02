@@ -1,4 +1,4 @@
-#include "../../../../include/Overlay/Gui/GuiManager.hpp"
+#include "../../../include/Overlay/GuiManager.hpp"
 
 namespace ovl {
 
